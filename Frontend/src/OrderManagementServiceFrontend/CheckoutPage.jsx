@@ -15,6 +15,7 @@ import {
   XCircle,
   Store,
   FileText,
+  Home, // <-- Import Home icon
 } from "lucide-react";
 
 const CheckoutPage = () => {
@@ -26,7 +27,7 @@ const CheckoutPage = () => {
   const [instructions, setInstructions] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({});
 
   // Fetch cart
   const fetchCart = async () => {
@@ -48,7 +49,7 @@ const CheckoutPage = () => {
       }
     } catch (err) {
       console.error("Error fetching cart:", err);
-      setError("Failed to load cart. Please try again.");
+      setErrors({ global: "Failed to load cart. Please try again." });
     } finally {
       setFetchLoading(false);
     }
@@ -87,7 +88,6 @@ const CheckoutPage = () => {
   const deliveryFee = deliveryType === "express" ? 250 : 109;
   const grandTotal = totalPrice + deliveryFee;
 
-  // Generate invoice number
   const generateInvoiceNumber = () => {
     const date = new Date();
     const year = date.getFullYear();
@@ -99,28 +99,41 @@ const CheckoutPage = () => {
 
   const invoiceNumber = generateInvoiceNumber();
 
+  // Phone Input Handler
+  const handlePhoneChange = (e) => {
+    const value = e.target.value;
+    const numericValue = value.replace(/\D/g, "").slice(0, 10);
+    setPhone(numericValue);
+    
+    if (errors.phone) {
+      setErrors(prev => ({ ...prev, phone: null }));
+    }
+  };
+
   // Handle checkout submit
   const handleCheckout = async () => {
-    // Validation
+    const newErrors = {};
+
     if (!address.trim()) {
-      setError("Address is required");
-      return;
+      newErrors.address = "Delivery address is required";
     }
-    if (!phone.trim()) {
-      setError("Phone number is required");
-      return;
+
+    if (!phone) {
+      newErrors.phone = "Phone number is required";
+    } else if (phone.length !== 10) {
+      newErrors.phone = "Please enter a valid 10-digit number";
     }
-    if (!/^[0-9+\-\s]+$/.test(phone)) {
-      setError("Please enter a valid phone number");
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
     try {
       setLoading(true);
-      setError(null);
+      setErrors({});
       
       const token = localStorage.getItem("token");
-      
       if (!token) {
         navigate("/login");
         return;
@@ -130,7 +143,7 @@ const CheckoutPage = () => {
         "http://localhost:4000/api/order/checkout",
         {
           address: address.trim(),
-          phone: phone.trim(),
+          phone: phone,
           deliveryType,
           instructions: instructions.trim() || "",
           shippingFee: deliveryFee
@@ -144,35 +157,25 @@ const CheckoutPage = () => {
       );
 
       if (response.data.success) {
-        alert("✅ Order placed successfully! You can track your order status in the order history.");
+        alert("✅ Order placed successfully!");
         navigate("/order-history");
       }
     } catch (err) {
       console.error("Checkout error:", err);
-      
       if (err.response?.status === 401) {
-        setError("Your session has expired. Please login again.");
+        setErrors({ global: "Your session has expired. Please login again." });
         localStorage.removeItem("token");
         setTimeout(() => navigate("/login"), 2000);
-      } else if (err.response?.status === 400) {
-        setError(err.response.data?.message || "Invalid checkout data");
-      } else if (err.response?.status === 404) {
-        setError("Checkout service not available. Please try again later.");
       } else {
-        setError(err.response?.data?.message || "Checkout failed. Please try again.");
+        setErrors({ global: err.response?.data?.message || "Checkout failed. Please try again." });
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Format price
-  const formatPrice = (price) => {
-    return `LKR ${price?.toLocaleString() || 0}`;
-  };
+  const formatPrice = (price) => `LKR ${price?.toLocaleString() || 0}`;
 
-  
-  // Loading state
   if (fetchLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
@@ -184,7 +187,6 @@ const CheckoutPage = () => {
     );
   }
 
-  // Empty cart state
   if (!cart.items?.length) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
@@ -208,19 +210,27 @@ const CheckoutPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-            Complete Your Order
-          </h1>
-          <p className="text-gray-600 mt-2">Just a few more details and you're done!</p>
+        {/* Header with Home Button */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="text-center flex-1">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+              Complete Your Order
+            </h1>
+            <p className="text-gray-600 mt-2">Just a few more details and you're done!</p>
+          </div>
+          <button
+            onClick={() => navigate("/")}
+            className="bg-white hover:bg-gray-100 text-gray-700 px-4 py-2 rounded-xl shadow-md flex items-center gap-2 transition-all duration-200 border border-gray-200"
+          >
+            <Home size={18} />
+            <span>Home</span>
+          </button>
         </div>
 
-        {/* Error Message */}
-        {error && (
+        {errors.global && (
           <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg flex items-start">
             <XCircle className="text-red-500 mr-3 flex-shrink-0" size={20} />
-            <p className="text-red-700">{error}</p>
+            <p className="text-red-700">{errors.global}</p>
           </div>
         )}
 
@@ -231,7 +241,6 @@ const CheckoutPage = () => {
               <FileText className="text-orange-600 mr-2" size={24} />
               <h2 className="text-xl font-bold text-orange-800">Invoice Preview</h2>
             </div>
-           
           </div>
           
           <div className="bg-white rounded-xl p-4">
@@ -245,7 +254,6 @@ const CheckoutPage = () => {
               </div>
             </div>
 
-            {/* Single Invoice with Multiple Shops */}
             <div className="space-y-4">
               {Object.entries(itemsByShop).map(([shopId, shopData], index) => (
                 <div key={shopId} className={index > 0 ? 'border-t border-gray-200 pt-4' : ''}>
@@ -254,7 +262,6 @@ const CheckoutPage = () => {
                     <h3 className="font-semibold text-gray-800">{shopData.shopName}</h3>
                   </div>
                   
-                  {/* Shop Items Table */}
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50">
@@ -271,11 +278,7 @@ const CheckoutPage = () => {
                             <td className="px-2 py-2">
                               <div className="flex items-center">
                                 {item.image ? (
-                                  <img 
-                                    src={item.image} 
-                                    alt={item.name}
-                                    className="w-8 h-8 object-cover rounded mr-2"
-                                  />
+                                  <img src={item.image} alt={item.name} className="w-8 h-8 object-cover rounded mr-2" />
                                 ) : (
                                   <Package className="text-gray-400 mr-2" size={16} />
                                 )}
@@ -291,7 +294,6 @@ const CheckoutPage = () => {
                     </table>
                   </div>
                   
-                  {/* Shop Subtotal */}
                   <div className="flex justify-end mt-2">
                     <span className="text-sm text-gray-600 mr-4">Shop Subtotal:</span>
                     <span className="font-semibold text-orange-600">{formatPrice(shopData.subtotal)}</span>
@@ -300,7 +302,6 @@ const CheckoutPage = () => {
               ))}
             </div>
 
-            {/* Grand Total */}
             <div className="mt-4 pt-4 border-t-2 border-gray-200">
               <div className="flex justify-end">
                 <div className="w-64">
@@ -330,28 +331,41 @@ const CheckoutPage = () => {
           </h2>
           
           <div className="space-y-4">
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Enter your delivery address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all outline-none"
-                required
-              />
+            <div className="flex flex-col">
+              <div className="relative">
+                <MapPin className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${errors.address ? 'text-red-500' : 'text-gray-400'}`} size={20} />
+                <input
+                  type="text"
+                  placeholder="Enter your delivery address"
+                  value={address}
+                  onChange={(e) => {
+                    setAddress(e.target.value);
+                    if (errors.address) setErrors({...errors, address: null});
+                  }}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:ring-2 transition-all outline-none
+                    ${errors.address ? 'border-red-500 focus:ring-red-100' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-100'}`}
+                />
+              </div>
+              {errors.address && <p className="text-red-500 text-sm mt-1 ml-1">{errors.address}</p>}
             </div>
 
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="tel"
-                placeholder="Phone number for contact"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all outline-none"
-                required
-              />
+            <div className="flex flex-col">
+              <div className="relative">
+                <Phone className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${errors.phone ? 'text-red-500' : 'text-gray-400'}`} size={20} />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Mobile number (10 digits)"
+                  value={phone}
+                  onChange={handlePhoneChange}
+                  className={`w-full pl-10 pr-10 py-3 border-2 rounded-xl focus:ring-2 transition-all outline-none
+                    ${errors.phone ? 'border-red-500 focus:ring-red-100' : 'border-gray-200 focus:border-orange-500 focus:ring-orange-100'}`}
+                />
+                {phone.length === 10 && (
+                  <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500" size={20} />
+                )}
+              </div>
+              {errors.phone && <p className="text-red-500 text-sm mt-1 ml-1">{errors.phone}</p>}
             </div>
 
             <textarea
@@ -359,7 +373,7 @@ const CheckoutPage = () => {
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
               rows="3"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all outline-none resize-none"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-100 transition-all outline-none resize-none"
             />
           </div>
         </div>
@@ -372,20 +386,8 @@ const CheckoutPage = () => {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label 
-              className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all
-                ${deliveryType === 'standard' 
-                  ? 'border-orange-500 bg-orange-50' 
-                  : 'border-gray-200 hover:border-orange-300'}`}
-            >
-              <input
-                type="radio"
-                name="delivery"
-                value="standard"
-                checked={deliveryType === 'standard'}
-                onChange={(e) => setDeliveryType(e.target.value)}
-                className="sr-only"
-              />
+            <label className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all ${deliveryType === 'standard' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300'}`}>
+              <input type="radio" name="delivery" value="standard" checked={deliveryType === 'standard'} onChange={(e) => setDeliveryType(e.target.value)} className="sr-only" />
               <div className="flex items-start">
                 <div className={`p-2 rounded-lg ${deliveryType === 'standard' ? 'bg-orange-500' : 'bg-gray-200'}`}>
                   <Clock className={`${deliveryType === 'standard' ? 'text-white' : 'text-gray-600'}`} size={20} />
@@ -396,27 +398,11 @@ const CheckoutPage = () => {
                   <p className="text-orange-600 font-bold mt-2">LKR 109</p>
                 </div>
               </div>
-              {deliveryType === 'standard' && (
-                <div className="absolute top-2 right-2">
-                  <CheckCircle className="text-orange-500" size={20} />
-                </div>
-              )}
+              {deliveryType === 'standard' && <div className="absolute top-2 right-2"><CheckCircle className="text-orange-500" size={20} /></div>}
             </label>
 
-            <label 
-              className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all
-                ${deliveryType === 'express' 
-                  ? 'border-orange-500 bg-orange-50' 
-                  : 'border-gray-200 hover:border-orange-300'}`}
-            >
-              <input
-                type="radio"
-                name="delivery"
-                value="express"
-                checked={deliveryType === 'express'}
-                onChange={(e) => setDeliveryType(e.target.value)}
-                className="sr-only"
-              />
+            <label className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all ${deliveryType === 'express' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300'}`}>
+              <input type="radio" name="delivery" value="express" checked={deliveryType === 'express'} onChange={(e) => setDeliveryType(e.target.value)} className="sr-only" />
               <div className="flex items-start">
                 <div className={`p-2 rounded-lg ${deliveryType === 'express' ? 'bg-orange-500' : 'bg-gray-200'}`}>
                   <Zap className={`${deliveryType === 'express' ? 'text-white' : 'text-gray-600'}`} size={20} />
@@ -427,11 +413,7 @@ const CheckoutPage = () => {
                   <p className="text-orange-600 font-bold mt-2">LKR 250</p>
                 </div>
               </div>
-              {deliveryType === 'express' && (
-                <div className="absolute top-2 right-2">
-                  <CheckCircle className="text-orange-500" size={20} />
-                </div>
-              )}
+              {deliveryType === 'express' && <div className="absolute top-2 right-2"><CheckCircle className="text-orange-500" size={20} /></div>}
             </label>
           </div>
         </div>
@@ -469,9 +451,6 @@ const CheckoutPage = () => {
           )}
         </button>
 
-       
-
-        {/* Security Note */}
         <p className="text-xs text-center text-gray-400 mt-4">
           🔒 Your information is secure and encrypted
         </p>
