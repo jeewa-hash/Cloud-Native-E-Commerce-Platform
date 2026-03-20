@@ -2,65 +2,65 @@ name: Order Service CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    # Only runs when something changes inside OrderManagementService folder
     paths:
       - 'OrderManagementService/**'
+    branches: [ "main" ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout code
+      # 1. Checkout code from GitHub
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      # 2️⃣ Setup Node.js
+      # 2. Setup Node.js environment
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # 3️⃣ Install dependencies
+      # 3. Install dependencies
       - name: Install Dependencies
         run: npm install
         working-directory: ./OrderManagementService
 
-      # 4️⃣ Login to Docker Hub
+      # 4. Login to Docker Hub
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # 5️⃣ Build & Push Docker Image (FIXED)
+      # 5. Build and push Docker image
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v4
         with:
           context: ./OrderManagementService
           push: true
-          tags: katoshera/orderservice:latest
-          
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:latest
 
-      # 6️⃣ Configure AWS credentials
+      # 6. Configure AWS credentials
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # 7️⃣ Update ECS task definition (FIXED IMAGE)
-      - name: Update ECS task definition
+      # 7. Update ECS task definition with new Docker image
+      - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: OrderManagementService/task-definition.json
           container-name: orderservice
-          image: katoshera/orderservice:latest
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:latest
 
-      # 8️⃣ Deploy ECS Service
-      - name: Deploy ECS service
+      # 8. Deploy ECS service using updated task definition
+      - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
