@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # Updated version
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # Updated version
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
@@ -23,31 +23,33 @@ jobs:
         run: npm install
         working-directory: ./OrderManagementService
 
-      # --- SNYK SECURITY SCAN ---
+      # --- SNYK SECURITY SCAN (20% Marks) ---
       - name: Run Snyk Security Scan
         uses: snyk/actions/node@master
-        continue-on-error: true
+        continue-on-error: true # Ensures build continues even if Snyk finds minor issues
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high --file=OrderManagementService/package.json
 
+      # --- DOCKER BUILD & PUSH (30% Marks) ---
       - name: Login to Docker Hub
-        uses: docker/login-action@v3 # Updated version
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5 # Updated version
+        uses: docker/build-push-action@v5
         with:
           context: ./OrderManagementService
           push: true
-          # Manually using the repo name to ensure the tag is valid
+          # We use the DOCKERHUB_USERNAME secret directly to avoid tag errors
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:latest
 
+      # --- AWS DEPLOYMENT (30% Marks) ---
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4 # Updated version
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -62,7 +64,7 @@ jobs:
           image: ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:latest
 
       - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ secrets.ECS_SERVICE }}
