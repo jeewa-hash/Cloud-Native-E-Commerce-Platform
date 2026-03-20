@@ -1,34 +1,43 @@
 {
-    "family": "orderservice-task",
-    "networkMode": "awsvpc",
-    "containerDefinitions": [
+  "family": "orderservice-task",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "orderservice",
+      "image": "PLACEHOLDER_IMAGE",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "portMappings": [
         {
-            "name": "orderservice",
-            "image": "tashmioshera/orderservice:latest",
-            "cpu": 256,
-            "memory": 512,
-            "portMappings": [
-                {
-                    "containerPort": 4000,
-                    "hostPort": 4000,
-                    "protocol": "tcp"
-                }
-            ],
-            "essential": true,
-            "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                    "awslogs-group": "/ecs/orderservice",
-                    "awslogs-region": "eu-north-1",
-                    "awslogs-stream-prefix": "ecs"
-                }
-            }
+          "containerPort": 4000,
+          "hostPort": 4000,
+          "protocol": "tcp"
         }
-    ],
-    "requiresCompatibilities": [
-        "FARGATE"
-    ],
-    "cpu": "256",
-    "memory": "512",
-    "executionRoleArn": "arn:aws:iam::586988810414:role/ecsTaskExecutionRole"
+      ],
+      "environment": [
+        {
+          "name": "MONGO_URI",
+          "value": "your-mongodb-uri"
+        },
+        {
+          "name": "PORT",
+          "value": "4000"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/orderservice",
+          "awslogs-region": "eu-north-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::586988810414:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::586988810414:role/ecsTaskExecutionRole"
 }
