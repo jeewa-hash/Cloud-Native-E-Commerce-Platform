@@ -40,7 +40,7 @@ app.use("/api/order", orderRoutes);
 app.use("/api/cart", cartRoutes);
 
 app.get('/', (req, res) => {
-  res.send('Order Management Backend is WORKING v1.0.1 ✅');
+  res.send('Order Management Backend is WORKING ✅');
 });
 
 // Start server and connect DB
