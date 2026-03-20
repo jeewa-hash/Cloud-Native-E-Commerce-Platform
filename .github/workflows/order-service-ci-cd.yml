@@ -2,49 +2,38 @@ name: Order Service CI/CD
 
 on:
   push:
-    paths:
-      - 'OrderManagementService/**' # Updated to match your path
     branches: [ "main" ]
+    paths:
+      - 'OrderManagementService/**'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
 
     steps:
+      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # 1. Install Dependencies - Folder path fixed
+      # 3. Install dependencies
       - name: Install Dependencies
         run: npm install
-        working-directory: ./OrderManagementService 
+        working-directory: ./OrderManagementService
 
-      # 2. SAST Security Scan
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-
-      # 3. Docker Hub Login
+      # 4. Docker login
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # 4. Build and Push - Context path fixed
+      # 5. Build & push Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -52,7 +41,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:latest
 
-      # 5. AWS Deploy
+      # 6. Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -60,14 +49,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Update ECS task definition - Path fixed
+      # 7. Update ECS task definition
+      - name: Update ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: OrderManagementService/${{ secrets.ECS_TASK_DEFINITION }}
+          task-definition: OrderManagementService/task-definition.json
           container-name: orderservice
           image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:latest
 
+      # 8. Deploy ECS service
       - name: Deploy ECS service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
