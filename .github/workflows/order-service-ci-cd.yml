@@ -1,46 +1,53 @@
-name: Orderservice CI/CD
+name: Order Service CI/CD
 
 on:
   push:
+    paths:
+      - 'OrderService/**'
     branches: [ "main" ]
-    # Removed paths for testing; add back only if your code is in a subfolder
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # Updated to v4
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install Dependencies
-        run: npm install
-        # working-directory: ./OrderService # Uncomment if folder exists
+      # --- 1. SAST SECURITY SCAN (CodeQL - No Token Needed) ---
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
 
-      # --- REQUIRED FOR ASSIGNMENT: DEVSECOPS SCAN ---
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
-        continue-on-error: true # So the pipeline doesn't stop if it finds a small bug
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
 
+      # --- 2. DOCKER BUILD & PUSH ---
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME_ORDERSERVICE }}
-          password: ${{ secrets.DOCKER_PASSWORD_ORDERSERVICE }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          # context: ./OrderService # Uncomment if folder exists
+          context: ./OrderService
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME_ORDERSERVICE }}/orderservice:latest
+          # Uses your IMAGE_NAME secret for the tag
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:latest
 
+      # --- 3. AWS DEPLOYMENT ---
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -52,14 +59,15 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: task-definition.json # Ensure this file is in your repo
+          # Uses your ECS_TASK_DEFINITION secret for the filename
+          task-definition: OrderService/${{ secrets.ECS_TASK_DEFINITION }}
           container-name: orderservice
-          image: ${{ secrets.DOCKER_USERNAME_ORDERSERVICE }}/orderservice:latest
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:latest
 
       - name: Deploy ECS service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: orderservice
-          cluster: ordermicroservices-cluster
+          service: ${{ secrets.ECS_SERVICE }}
+          cluster: ${{ secrets.ECS_CLUSTER }}
           wait-for-service-stability: true
