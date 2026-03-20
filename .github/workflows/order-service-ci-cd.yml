@@ -1,0 +1,77 @@
+name: Order Service CI/CD
+
+on:
+  push:
+    paths:
+      - 'OrderService/**'
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # 3. Install dependencies
+      - name: Install Dependencies
+        run: npm install
+        working-directory: ./OrderService
+
+      # 4. Optional Snyk scan for DevSecOps
+      - name: Run Snyk
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN_ORDER_SERVICE }}
+        with:
+          args: --severity-threshold=high --pkg-manager=npm --file=OrderService/package.json
+
+      # 5. Login to Docker Hub
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME_ORDER_SERVICE }}
+          password: ${{ secrets.DOCKER_PASSWORD_ORDER_SERVICE }}
+
+      # 6. Build & push Docker image
+      - name: Build & push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./OrderService
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME_ORDER_SERVICE }}/order-service:latest
+
+      # 7. Configure AWS credentials
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # 8. Update ECS task definition
+      - name: Render new ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: OrderService/task-definition.json
+          container-name: order-container
+          image: ${{ secrets.DOCKER_USERNAME_ORDER_SERVICE }}/order-service:latest
+
+      # 9. Deploy ECS service
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: order-service       # Your ECS service name
+          cluster: EcomCluster1        # Your ECS cluster name
+          wait-for-service-stability: true
