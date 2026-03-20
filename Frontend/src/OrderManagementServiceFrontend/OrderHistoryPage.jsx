@@ -28,9 +28,9 @@ const OrderHistoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedOrder, setExpandedOrder] = useState(null);
-  const [filter, setFilter] = useState("all"); // all, pending, completed, etc.
+  const [filter, setFilter] = useState("all"); // add lines
 
-  // Fetch orders
+  
   const fetchOrders = async () => {
     try {
       setLoading(true);
