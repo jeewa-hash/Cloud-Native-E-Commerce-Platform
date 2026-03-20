@@ -40,6 +40,7 @@ jobs:
           context: ./OrderManagementService
           push: true
           tags: katoshera/orderservice:latest
+          
 
       # 6️⃣ Configure AWS credentials
       - name: Configure AWS credentials
