@@ -2,7 +2,6 @@ name: Order Service CI/CD
 
 on:
   push:
-    # Only runs when something changes inside OrderManagementService folder
     paths:
       - 'OrderManagementService/**'
     branches: [ "main" ]
@@ -12,29 +11,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code from GitHub
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Setup Node.js environment
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # 3. Install dependencies
       - name: Install Dependencies
         run: npm install
         working-directory: ./OrderManagementService
 
-      # 4. Login to Docker Hub
+      # --- ADDED: SNYK SECURITY SCAN (20% Marks) ---
+      - name: Run Snyk Security Scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+          command: test
+          directory: ./OrderManagementService
+
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # 5. Build and push Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -42,7 +46,6 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:latest
 
-      # 6. Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -50,7 +53,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # 7. Update ECS task definition with new Docker image
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -59,7 +61,6 @@ jobs:
           container-name: orderservice
           image: ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:latest
 
-      # 8. Deploy ECS service using updated task definition
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
