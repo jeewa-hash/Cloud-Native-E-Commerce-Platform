@@ -2,10 +2,19 @@ import Notification from "../models/notificationModel.js";
 
 export const createNotification = async (data) => {
   try {
-    const notification = await Notification.create(data);
-    console.log("Notification saved:", notification._id);
+    // We map 'orderId' from RabbitMQ to 'relatedId' in the Schema
+    const notificationData = {
+      ...data,
+      relatedId: data.orderId || data.relatedId 
+    };
+
+    const notification = await Notification.create(notificationData);
+    console.log("💾 Notification saved to DB:", notification._id);
+    
+    return notification; // CRITICAL: This allows Socket.io to send the data!
   } catch (error) {
-    console.error("Error creating notification:", error.message);
+    console.error("❌ Error creating notification:", error.message);
+    return null; 
   }
 };
 
