@@ -17,5 +17,4 @@ COPY . .
 EXPOSE 5002
 
 # Define the command to run your app
-# Using "node src/index.js" directly ensures it doesn't run with nodemon in production
 CMD ["node", "src/index.js"]

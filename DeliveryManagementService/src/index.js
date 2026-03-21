@@ -21,10 +21,10 @@ app.use('/api/delivery', deliveryRoutes);
 const PORT = process.env.PORT || 5003; 
 const MONGO_URI = process.env.MONGO_URI;
  
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(MONGO_URI)
     .then(() => {
     logger.info("Delivery Service DB Connected");        
-    app.listen(process.env.PORT, () => {
+    app.listen(PORT, () => {
         logger.info(`Delivery Service running on port ${PORT}`);
     });
   })
