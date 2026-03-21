@@ -14,7 +14,9 @@ const allowedOrigins = [
   'http://localhost:3000', // frontend URL
   'http://127.0.0.1:3000', 
   'http://localhost:5173',
-  // add other allowed origins here
+    'http://order-frontend-bucket-123.s3-website.eu-north-1.amazonaws.com' // <-- S3 frontend URL
+
+  
 ];
 
 app.use(
