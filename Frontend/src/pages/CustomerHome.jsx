@@ -4,6 +4,7 @@ import { ShoppingBag, ShoppingCart, User, LogOut, Menu, X, Store,Clock } from 'l
 import ShoppingItems from '../components/ShoppingItems';
 import ShopList from '../components/ShopList';
 import CustomerProfile from '../components/CustomerProfile';
+import OrderHistoryPage from '../OrderManagementServiceFrontend/OrderHistoryPage';
 
 const CustomerHome = () => {
     const navigate = useNavigate();
@@ -52,9 +53,11 @@ const CustomerHome = () => {
                     <CustomerProfile/>
                 );
              case 'orders':
-            // Navigate to Order History page
-            navigate('/order-history');
-            return null;
+            /* // Navigate to Order History page
+            navigate('/order-history');*/            
+                return (<OrderHistoryPage/>
+                    
+                );
         default:
             return null;
     }
