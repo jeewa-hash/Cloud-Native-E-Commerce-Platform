@@ -48,7 +48,7 @@ jobs:
         with:
           context: ./OrderManagementService
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:1.0  # versioned image
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:1.0
 
       # 7️⃣ Configure AWS credentials
       - name: Configure AWS credentials
@@ -65,7 +65,7 @@ jobs:
         with:
           task-definition: OrderManagementService/task-definition.json
           container-name: orderservice
-          image: ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:1.0  # must match pushed image
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:1.0
 
       # 9️⃣ Deploy to ECS
       - name: Deploy Amazon ECS task definition
