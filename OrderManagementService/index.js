@@ -7,16 +7,13 @@ import cartRoutes from "./routes/cartRoutes.js";
 
 const app = express();
 
-// ----------------------
 // CORS configuration
-// ----------------------
 const allowedOrigins = [
-  'http://localhost:3000', // frontend URL
+  'http://localhost:3000',
   'http://127.0.0.1:3000', 
   'http://localhost:5173',
-    'http://order-frontend-bucket-123.s3-website.eu-north-1.amazonaws.com' // <-- S3 frontend URL
+    'http://order-frontend-bucket-123.s3-website.eu-north-1.amazonaws.com' 
 
-  
 ];
 
 app.use(
