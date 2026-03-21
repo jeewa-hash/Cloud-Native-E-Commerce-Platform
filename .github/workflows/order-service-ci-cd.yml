@@ -67,7 +67,8 @@ jobs:
           container-name: orderservice
           image: ${{ secrets.DOCKERHUB_USERNAME }}/orderservice:1.0
 
-      # 9️⃣ Deploy to ECS
+
+      # 9️⃣ Deploy to ECS.....
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
