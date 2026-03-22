@@ -20,6 +20,7 @@ import {
 
 import config from "../config";
 const ORDER_SERVICE_URL = config.ORDER_API;
+const DELIVERY_API_URL = config.DELIVERY_API;
 
 const ShopOrdersPage = () => {
   const [orders, setOrders] = useState([]);

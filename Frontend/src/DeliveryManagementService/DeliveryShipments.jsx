@@ -1,6 +1,9 @@
 import React from "react";
 import { PackageCheck, Clock3 } from "lucide-react";
 
+import config from "../config";
+const DELIVERY_API_URL = config.DELIVERY_API;
+
 const DeliveryShipments = () => {
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-10">

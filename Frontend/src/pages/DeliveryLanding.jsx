@@ -4,6 +4,10 @@ import { Loader2, Truck, AlertCircle } from "lucide-react";
 import CreateDeliveryProfile from "../DeliveryManagementService/CreateDeliveryProfile";
 import DeliveryHome from "./DeliveryHome";
 
+import config from "../config";
+const DELIVERY_API_URL = config.DELIVERY_API;
+
+
 const DeliveryLandingPage = () => {
   const [loading, setLoading] = useState(true);
   const [hasProfile, setHasProfile] = useState(false);
@@ -17,7 +21,7 @@ const DeliveryLandingPage = () => {
 
       const token = localStorage.getItem("token");
 
-      const res = await axios.get("http://localhost:5003/delivery/delivery-profile", {
+      const res = await axios.get(`${DELIVERY_API_URL}/delivery-profile`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
