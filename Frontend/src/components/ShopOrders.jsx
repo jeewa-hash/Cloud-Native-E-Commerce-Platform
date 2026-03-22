@@ -83,7 +83,7 @@ const ShopOrdersPage = () => {
       const token = localStorage.getItem("token");
 
       const res = await axios.patch(
-        `${ORDER_SERVICE_URL}/api/order/shop/orders/${orderId}/status`,
+        `${ORDER_SERVICE_URL}/shop/orders/${orderId}/status`,
         { status: newStatus },
         {
           headers: {
