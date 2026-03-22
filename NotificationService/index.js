@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 import { connectRabbitMQ } from './config/rabbitmqConfig.js';
 import { listenOrderEvents } from './events/orderEvents.js';
 import router from './routes/notificationRoutes.js';
+import { swaggerUi, specs } from './swagger.js';
 
 const app = express();
 app.use(cors({
@@ -14,7 +15,7 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 const port = process.env.PORT || 5000;
 const mongoURI = process.env.MONGO_URI;
 
