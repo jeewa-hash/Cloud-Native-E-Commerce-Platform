@@ -54,6 +54,25 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+  
+  delivery-service:
+    build:
+      context: .
+      dockerfile: DeliveryManagementService/Dockerfile
+    container_name: delivery-service
+    ports:
+      - "5003:5003"
+    environment:
+      - MONGO_URI=your_mongodb_uri
+      - JWT_SECRET=super_secret_jwt_key_here
+      - SHOP_SERVICE_URL=http://shop-service:4040/api/products
+      - AUTH_SERVICE_URL=http://user-auth-service:5002/api/user
+      - ORDER_SERVICE_URL=http://order-service:4000/api/order
+      - RABBITMQ_URL=amqp://rabbitmq
+      - PORT=5003
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   notification-service:
     build:
@@ -82,3 +101,4 @@ services:
       - shop-service
       - order-service
       - notification-service
+      - delivery-service
