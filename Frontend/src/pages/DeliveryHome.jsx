@@ -11,10 +11,10 @@ import {
   LayoutDashboard
 } from "lucide-react";
 
-import DeliveryDashboard from "../components/delivery/DeliveryDashboard.jsx";
-import DeliveryShipments from "../components/delivery/DeliveryShipments.jsx";
-import DeliveryTracking from "../components/delivery/DeliveryTracking.jsx";
-import DeliveryProfile from "../components/delivery/DeliveryProfile.jsx";
+import DeliveryDashboard from "../DeliveryManagementService/DeliveryDashboard.jsx";
+import DeliveryShipments from "../DeliveryManagementService/DeliveryShipments.jsx";
+import DeliveryTracking from "../DeliveryManagementService/DeliveryTracking.jsx";
+import DeliveryProfile from "../DeliveryManagementService/DeliveryProfile.jsx";
 
 const DeliveryHome = () => {
   const navigate = useNavigate();

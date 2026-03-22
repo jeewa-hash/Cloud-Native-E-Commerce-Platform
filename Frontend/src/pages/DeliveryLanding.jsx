@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Loader2, Truck, AlertCircle } from "lucide-react";
-import CreateDeliveryProfile from "../components/delivery/CreateDeliveryProfile";
+import CreateDeliveryProfile from "../DeliveryManagementService/CreateDeliveryProfile";
 import DeliveryHome from "./DeliveryHome";
 
 const DeliveryLandingPage = () => {

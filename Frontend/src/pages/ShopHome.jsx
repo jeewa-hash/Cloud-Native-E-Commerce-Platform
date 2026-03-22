@@ -4,6 +4,7 @@ import { Package, PlusCircle, User, LogOut, Menu, X, Store, ClipboardList } from
 import AddProduct from '../components/AddProduct';
 import ProductCatalog from '../components/ProductCatalog';
 import CustomerProfile from '../components/CustomerProfile';
+import ShopOrders from '../components/ShopOrders';
 
 const ShopHome = () => {
     const navigate = useNavigate();
@@ -54,10 +55,7 @@ const ShopHome = () => {
                 );
             case 'orders':
                 return (
-                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <h2 className="text-2xl font-bold mb-6 text-gray-800">Orders For Us</h2>
-                        <p className="text-gray-500">Manage incoming orders here.</p>
-                    </div>
+                    <ShopOrders/>
                 );
             default:
                 return null;
