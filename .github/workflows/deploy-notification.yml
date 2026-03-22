@@ -1,0 +1,42 @@
+name: Deploy Notification Service
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'NotificationService/**'
+      - 'Shared/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.NOTIFICATION_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.NOTIFICATION_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag and push image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/notification-service:$IMAGE_TAG -f NotificationService/Dockerfile .
+          docker push $ECR_REGISTRY/notification-service:$IMAGE_TAG
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service \
+            --cluster ecommerce-cluster_notifcation \
+            --service notification-service-service-rg6po0kz \
+            --force-new-deployment \
+            --region us-east-1
