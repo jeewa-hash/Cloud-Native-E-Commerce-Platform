@@ -2,6 +2,7 @@ import express from "express";
 import {
   createDeliveryPerson,
   getDeliveryPersons,
+  getProfile,
   assignShipment,
   pickupShipment,
   addTracking,
@@ -10,11 +11,13 @@ import {
   returnToShop,
   markReturned
 } from "../controllers/deliveryController.js";
+import { authMiddleware, requireDeliveryRole } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/delivery-persons", createDeliveryPerson);
+router.post("/delivery-persons", authMiddleware, requireDeliveryRole, createDeliveryPerson);
 router.get("/delivery-persons", getDeliveryPersons);
+router.get("/delivery-profile", authMiddleware, requireDeliveryRole, getProfile);
 
 router.post("/shipments/assign", assignShipment);
 router.put("/shipments/:id/pickup", pickupShipment);

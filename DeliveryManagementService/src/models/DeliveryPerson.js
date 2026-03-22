@@ -7,16 +7,29 @@ const DeliveryPersonSchema = new mongoose.Schema({
     unique: true
   },
 
-  name: { type: String, required: true },
-  email: String,
-  phone: { type: String, required: true },
+  phone: {
+    type: String,
+    required: true
+  },
 
-  zipCode: { type: String, required: true },
+  zipCode: {
+    type: String,
+    required: true
+  },
+
+  city: {
+    type: String
+  },
 
   vehicleType: {
     type: String,
     enum: ["bike", "scooter", "car", "van"],
     default: "bike"
+  },
+
+  vehicleNumber: {
+    type: String,
+    required: true
   },
 
   availabilityStatus: {
@@ -25,7 +38,10 @@ const DeliveryPersonSchema = new mongoose.Schema({
     default: "AVAILABLE"
   },
 
-  isActive: { type: Boolean, default: true }
+  isActive: {
+    type: Boolean,
+    default: true
+  }
 
 }, { timestamps: true });
 

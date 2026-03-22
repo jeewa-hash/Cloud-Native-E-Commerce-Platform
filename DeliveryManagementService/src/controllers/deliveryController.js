@@ -2,13 +2,62 @@ import DeliveryPerson from "../models/DeliveryPerson.js";
 import Shipment from "../models/Shipment.js";
 import logger from "../utils/logger.js";
 
+export const getProfile = async (req, res) => {
+  try {
+    const person = await DeliveryPerson.findOne({ userId: req.user.id });
+
+    if (!person) {
+      return res.status(404).json({
+        success: false,
+        message: "Delivery profile not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      person
+    });
+  } catch (err) {
+    logger.error(err, "Get delivery profile failed");
+    res.status(500).json({
+      success: false,
+      message: "Failed to load delivery profile"
+    });
+  }
+};
+
 export const createDeliveryPerson = async (req, res) => {
   try {
-    const person = await DeliveryPerson.create(req.body);
-    res.status(201).json({ success: true, person });
+    const { phone, city, zipCode, vehicleType, vehicleNumber } = req.body;
+
+    const existing = await DeliveryPerson.findOne({ userId: req.user.id });
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: "Delivery profile already exists"
+      });
+    }
+
+    const person = await DeliveryPerson.create({
+      userId: req.user.id,
+      phone,
+      city,
+      zipCode,
+      vehicleType: vehicleType || "bike",
+      vehicleNumber
+    });
+
+    res.status(201).json({
+      success: true,
+      person
+    });
   } catch (err) {
     logger.error(err, "Create delivery person failed");
-    res.status(500).json({ success: false });
+    res.status(500).json({
+      success: false,
+      message: "Failed to create delivery profile"
+    });
   }
 };
 

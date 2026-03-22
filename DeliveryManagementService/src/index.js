@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/delivery', deliveryRoutes);
+app.use('/delivery', deliveryRoutes);
 
 // Database Connection & Server Start
 const PORT = process.env.PORT || 5003; 
@@ -31,3 +31,8 @@ mongoose.connect(MONGO_URI)
       .catch((err) => {
         logger.error("DB Connection Error:", err.message);
       });
+
+app.get("/delivery", (req, res, next) => {
+    res.send("<h2>Delivery Management API</h2>")
+    next();
+});

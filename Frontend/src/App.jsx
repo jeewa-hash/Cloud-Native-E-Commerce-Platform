@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import CustomerHome from './pages/CustomerHome';
 import ShopHome from './pages/ShopHome';
 import AdminDashboard from './pages/AdminDashboard';
+import DeliveryLanding from './pages/DeliveryLanding';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import CheckoutPage from './OrderManagementServiceFrontend/CheckoutPage';
@@ -38,6 +39,11 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
         </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={['delivery']} />}>
+          <Route path="/delivery-profile" element={<DeliveryLanding />} />
+        </Route>
+
       </Routes>
     </Router>
   );
