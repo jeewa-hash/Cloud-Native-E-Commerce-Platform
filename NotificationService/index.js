@@ -11,9 +11,9 @@ import { swaggerUi, specs } from './swagger.js';
 
 const app = express();
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
+  credentials: false
 }));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 const port = process.env.PORT || 5000;
