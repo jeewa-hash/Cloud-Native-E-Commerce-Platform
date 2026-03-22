@@ -4,7 +4,8 @@ on:
   push:
     paths:
       - 'OrderManagementService/**'
-    branches: [ "main" ]
+    branches:
+      - 'OrderService'
 
 jobs:
   build-and-deploy:

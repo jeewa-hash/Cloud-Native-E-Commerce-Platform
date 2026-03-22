@@ -3,7 +3,8 @@ import Order from "../models/Order.js";
 import mongoose from "mongoose";
 import axios from "axios";
 
-const SHOP_SERVICE_URL = process.env.SHOP_SERVICE_URL;
+// Use your Shop Service URL
+const SHOP_SERVICE_URL = process.env.SHOP_SERVICE_URL || "http://shop-alb-1163828963.eu-north-1.elb.amazonaws.com";
 
 // Optional: fetch product details from Shop service
 async function fetchProduct(productId) {
@@ -16,7 +17,9 @@ async function fetchProduct(productId) {
   }
 }
 
+// ==========================================================
 // CHECKOUT ORDER
+// ==========================================================
 export const checkoutOrder = async (req, res) => {
   const session = await mongoose.startSession();
 
@@ -162,3 +165,4 @@ export const updateOrderStatus = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+

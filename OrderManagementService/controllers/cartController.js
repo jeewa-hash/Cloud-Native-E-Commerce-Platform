@@ -1,13 +1,13 @@
 import Cart from "../models/Cart.js";
 import axios from "axios";
 
-const SHOP_SERVICE_URL = process.env.SHOP_SERVICE_URL;
+const SHOP_SERVICE_URL = process.env.SHOP_SERVICE_URL || "http://shop-alb-1163828963.eu-north-1.elb.amazonaws.com";
 const sameProduct = (a, b) => a.toString() === b.toString();
 
 // Fetch product from Shop Service
 async function fetchProduct(productId) {
   try {
-    const response = await axios.get(`${SHOP_SERVICE_URL}/${productId}`); // fetch single product
+    const response = await axios.get(`${SHOP_SERVICE_URL}/products/${productId}`);
     return response.data || null;
   } catch (error) {
     console.error("Product fetch failed:", error.message);
@@ -21,24 +21,17 @@ export const addToCart = async (req, res) => {
     const userId = req.userId;
     const { productId, quantity = 1 } = req.body;
 
-    if (!productId) {
-      return res.status(400).json({ success: false, message: "productId is required" });
-    }
+    if (!productId) return res.status(400).json({ success: false, message: "productId is required" });
 
-    // Fetch the product details
     const product = await fetchProduct(productId);
-    if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" });
-    }
+    if (!product) return res.status(404).json({ success: false, message: "Product not found" });
 
     let cart = await Cart.findOne({ user: userId });
     if (!cart) cart = new Cart({ user: userId, items: [] });
 
-    // Check if item already exists
     const existingItem = cart.items.find(item => sameProduct(item.product, productId));
-    if (existingItem) {
-      existingItem.quantity += quantity;
-    } else {
+    if (existingItem) existingItem.quantity += quantity;
+    else {
       cart.items.push({
         product: productId,
         name: product.name,
@@ -76,42 +69,23 @@ export const updateCartQuantity = async (req, res) => {
   try {
     const userId = req.userId;
     const { productId, quantity } = req.body;
-    
-    if (!productId) {
-      return res.status(400).json({ success: false, message: "productId is required" });
-    }
-    
-    if (quantity < 0) {
-      return res.status(400).json({ success: false, message: "Quantity cannot be negative" });
-    }
+
+    if (!productId) return res.status(400).json({ success: false, message: "productId is required" });
+    if (quantity < 0) return res.status(400).json({ success: false, message: "Quantity cannot be negative" });
 
     const cart = await Cart.findOne({ user: userId });
-    if (!cart) {
-      return res.status(404).json({ success: false, message: "Cart not found" });
-    }
+    if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
-    // FIX: Update quantity properly
-    const itemIndex = cart.items.findIndex(item => 
-      item.product && item.product.toString() === productId.toString()
-    );
+    const itemIndex = cart.items.findIndex(item => item.product && item.product.toString() === productId.toString());
+    if (itemIndex === -1) return res.status(404).json({ success: false, message: "Item not found in cart" });
 
-    if (itemIndex === -1) {
-      return res.status(404).json({ success: false, message: "Item not found in cart" });
-    }
-
-    if (quantity === 0) {
-      // Remove item if quantity is 0
-      cart.items.splice(itemIndex, 1);
-    } else {
-      // Update quantity
-      cart.items[itemIndex].quantity = quantity;
-    }
+    if (quantity === 0) cart.items.splice(itemIndex, 1);
+    else cart.items[itemIndex].quantity = quantity;
 
     await cart.save();
-    
     const updatedCart = await Cart.findOne({ user: userId }).lean();
     res.json({ success: true, cart: updatedCart });
-    
+
   } catch (error) {
     console.error("Update cart error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -123,26 +97,17 @@ export const removeFromCart = async (req, res) => {
   try {
     const userId = req.userId;
     const { productId } = req.body;
-    
-    if (!productId) {
-      return res.status(400).json({ success: false, message: "productId is required" });
-    }
+    if (!productId) return res.status(400).json({ success: false, message: "productId is required" });
 
     const cart = await Cart.findOne({ user: userId });
-    if (!cart) {
-      return res.status(404).json({ success: false, message: "Cart not found" });
-    }
+    if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
-    // FIX: Filter out the item properly
-    cart.items = cart.items.filter(item => 
-      !(item.product && item.product.toString() === productId.toString())
-    );
-    
+    cart.items = cart.items.filter(item => !(item.product && item.product.toString() === productId.toString()));
     await cart.save();
-    
+
     const updatedCart = await Cart.findOne({ user: userId }).lean();
     res.json({ success: true, cart: updatedCart });
-    
+
   } catch (error) {
     console.error("Remove from cart error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -154,23 +119,17 @@ export const clearCart = async (req, res) => {
   try {
     const userId = req.userId;
     const cart = await Cart.findOne({ user: userId });
-    
-    if (!cart) {
-      return res.status(404).json({ success: false, message: "Cart not found" });
-    }
+    if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
     cart.items = [];
     await cart.save();
-    
+
     const updatedCart = await Cart.findOne({ user: userId }).lean();
-    res.json({ 
-      success: true, 
-      message: "Cart cleared", 
-      cart: updatedCart 
-    });
-    
+    res.json({ success: true, message: "Cart cleared", cart: updatedCart });
+
   } catch (error) {
     console.error("Clear cart error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
