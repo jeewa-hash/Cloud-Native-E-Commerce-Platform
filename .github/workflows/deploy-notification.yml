@@ -37,6 +37,6 @@ jobs:
         run: |
           aws ecs update-service \
             --cluster ecommerce-cluster_notifcation \
-            --service notification-service-service-rg6po0kz \
+           --service notification-service-service-ocxaph0o \
             --force-new-deployment \
             --region us-east-1
