@@ -1,4 +1,5 @@
 import 'dotenv/config'; 
+import cors from "cors";
 import express from 'express';
 import mongoose from 'mongoose';
 import http from 'http';
@@ -6,7 +7,14 @@ import { Server } from 'socket.io';
 import { connectRabbitMQ } from './config/rabbitmqConfig.js';
 import { listenOrderEvents } from './events/orderEvents.js';
 import router from './routes/notificationRoutes.js';
+
 const app = express();
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 const port = process.env.PORT || 5000;
 const mongoURI = process.env.MONGO_URI;
 
