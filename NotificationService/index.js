@@ -18,13 +18,17 @@ app.use(cors({
 }));
 
 app.use(express.json()); // ← must be before routes
+app.get('/', (req, res) => {
+  res.status(200).json({ service: 'Notification Service', status: 'running' });
+});
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs)); // ← swagger
 app.use('/api/notifications', router); // ← your routes
 
-app.get('/', (req, res) => {
-  res.json({ service: 'Notification Service', status: 'running' });
-});
+
 
 const port = process.env.PORT || 5000;
 const mongoURI = process.env.MONGO_URI;
