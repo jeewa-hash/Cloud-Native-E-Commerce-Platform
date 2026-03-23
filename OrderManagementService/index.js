@@ -5,26 +5,11 @@ import mongoose from 'mongoose';
 import orderRoutes from "./routes/orderRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import { swaggerUi, specs } from './swagger.config.js';
-import helmet from 'helmet';
 
 const app = express();
 
 // Trust AWS ALB proxy
 app.set('trust proxy', true);
-
-// Security middleware — must be applied BEFORE Swagger UI
-// CSP is disabled so Swagger UI can load its inline scripts & styles
-app.use(
-  helmet({
-    contentSecurityPolicy: false,
-    crossOriginEmbedderPolicy: false,
-  })
-);
-
-
-// ✅ Swagger UI — spread serve array for Express 5 compatibility
-app.use('/api-docs', ...swaggerUi.serve, swaggerUi.setup(specs));
-
 
 // CORS configuration
 const allowedOrigins = [
@@ -33,7 +18,6 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:4000',
   'http://order-frontend-bucket-123.s3-website.eu-north-1.amazonaws.com',
-  // Allow requests originating from the ALB (e.g. Swagger UI loaded via ALB URL)
   'http://orderservice-alb-1335748857.eu-north-1.elb.amazonaws.com',
 ];
 
@@ -50,28 +34,26 @@ app.use(
   })
 );
 
-
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Swagger UI
+app.use('/api-docs', ...swaggerUi.serve, swaggerUi.setup(specs));
 
 // Routes
 app.use("/api/order", orderRoutes);
 app.use("/api/cart", cartRoutes);
-
 
 // Test route
 app.get('/', (req, res) => {
   res.send('Order Management Backend is WORKING✅');
 });
 
-
 // Health check
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
-
 
 // Start server
 const port = process.env.PORT || 4000;
