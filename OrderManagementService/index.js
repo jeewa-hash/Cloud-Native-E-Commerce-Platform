@@ -9,8 +9,14 @@ import helmet from 'helmet';
 
 const app = express();
 
+// Trust AWS ALB proxy (required for swagger-ui-express static files to work correctly)
+app.set('trust proxy', true);
+
 // Swagger Documentation Route (BEFORE helmet to avoid CSP blocking)
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  customSiteTitle: 'Order Management Service API',
+  swaggerOptions: { persistAuthorization: true }
+}));
 
 // Security middleware (CSP disabled to allow Swagger UI)
 app.use(helmet({
@@ -23,8 +29,7 @@ const allowedOrigins = [
   'http://127.0.0.1:3000',
   'http://localhost:5173',
   'http://localhost:4000',
-  'http://order-frontend-bucket-123.s3-website.eu-north-1.amazonaws.com',
-  'http://orderservice-alb-1335748857.eu-north-1.elb.amazonaws.com'
+  'http://order-frontend-bucket-123.s3-website.eu-north-1.amazonaws.com'
 ];
 
 app.use(
