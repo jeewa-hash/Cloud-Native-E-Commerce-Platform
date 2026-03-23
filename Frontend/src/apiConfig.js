@@ -1,5 +1,5 @@
 const API_GATEWAY = "https://0eqk5p25gi.execute-api.us-east-1.amazonaws.com";
-
+export const BASE_URL = API_GATEWAY;
 export const AUTH_API = `${API_GATEWAY}/auth`;
 export const SHOP_API = `${API_GATEWAY}/shop`;
 export const ORDER_API = `${API_GATEWAY}/order`;
