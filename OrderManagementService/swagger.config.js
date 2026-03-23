@@ -5,9 +5,9 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Order Management Service API',
+      title: 'Order & Cart Management Service API',
       version: '1.0.0',
-      description: 'API contract for the Order microservice of the Cloud-Native E-Commerce Platform',
+      description: 'API contract for the Order and Cart microservices of the Cloud-Native E-Commerce Platform',
     },
     servers: [
       {
@@ -28,65 +28,32 @@ const options = {
         },
       },
     },
-    security: [
-      {
-        bearerAuth: [],
-      },
-    ],
+    security: [{ bearerAuth: [] }],
     paths: {
       '/health': {
         get: {
           summary: 'Health Check',
-          description: 'Check if the Order Management Service is running. Used by AWS ALB for target health monitoring.',
+          description: 'Check if the Order Management Service is running.',
           tags: ['System'],
           security: [],
           responses: {
             200: {
               description: 'Service is healthy',
               content: {
-                'text/plain': {
-                  schema: {
-                    type: 'string',
-                    example: 'OK',
-                  },
-                },
+                'text/plain': { schema: { type: 'string', example: 'OK' } },
               },
             },
           },
         },
       },
-      '/api/order/history': {
-        get: {
-          summary: 'Get User Orders',
-          description: 'Retrieve all orders for the authenticated user',
-          tags: ['Order'],
-          responses: {
-            200: {
-              description: 'Successful response',
-            },
-          },
-        },
-      },
-      '/api/order/checkout': {
-        post: {
-          summary: 'Checkout Order',
-          description: "Create a new order from items in the user's cart. This endpoint communicates with the Shop Service to verify product details.",
-          tags: ['Order'],
-          responses: {
-            201: {
-              description: 'Order created successfully',
-            },
-          },
-        },
-      },
+
+      // ---------------- CART ----------------
       '/api/cart': {
         get: {
           summary: 'Get User Cart',
-          description: "Retrieve the current user's shopping cart.",
+          description: 'Retrieve the current user\'s shopping cart.',
           tags: ['Cart'],
-          responses: {
-            200: { description: 'Successful response' },
-          },
+          responses: { 200: { description: 'Successful response' } },
         },
       },
       '/api/cart/add': {
@@ -94,9 +61,22 @@ const options = {
           summary: 'Add to Cart',
           description: 'Add an item to the shopping cart.',
           tags: ['Cart'],
-          responses: {
-            200: { description: 'Item added successfully' },
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    productId: { type: 'string', example: 'P001' },
+                    quantity: { type: 'integer', example: 2 },
+                  },
+                  required: ['productId'],
+                },
+              },
+            },
           },
+          responses: { 200: { description: 'Item added successfully' } },
         },
       },
       '/api/cart/update': {
@@ -104,9 +84,22 @@ const options = {
           summary: 'Update Cart Item Quantity',
           description: 'Update the quantity of an item in the cart.',
           tags: ['Cart'],
-          responses: {
-            200: { description: 'Item updated successfully' },
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    productId: { type: 'string', example: 'P001' },
+                    quantity: { type: 'integer', example: 3 },
+                  },
+                  required: ['productId', 'quantity'],
+                },
+              },
+            },
           },
+          responses: { 200: { description: 'Item updated successfully' } },
         },
       },
       '/api/cart/remove': {
@@ -114,9 +107,19 @@ const options = {
           summary: 'Remove from Cart',
           description: 'Remove an item from the cart.',
           tags: ['Cart'],
-          responses: {
-            200: { description: 'Item removed successfully' },
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: { productId: { type: 'string', example: 'P001' } },
+                  required: ['productId'],
+                },
+              },
+            },
           },
+          responses: { 200: { description: 'Item removed successfully' } },
         },
       },
       '/api/cart/clear': {
@@ -124,9 +127,44 @@ const options = {
           summary: 'Clear Cart',
           description: 'Empty the entire cart.',
           tags: ['Cart'],
-          responses: {
-            200: { description: 'Cart cleared successfully' },
+          responses: { 200: { description: 'Cart cleared successfully' } },
+        },
+      },
+
+      // ---------------- ORDER ----------------
+      '/api/order/checkout': {
+        post: {
+          summary: 'Checkout Order',
+          description: 'Create a new order from items in the user\'s cart. Communicates with Shop Service to verify products.',
+          tags: ['Order'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    address: { type: 'string', example: '123 Street, City' },
+                    phone: { type: 'string', example: '0712345678' },
+                    paymentMethod: { type: 'string', example: 'cod' },
+                    deliveryType: { type: 'string', example: 'home' },
+                    instructions: { type: 'string', example: 'Leave at door' },
+                    shippingFee: { type: 'number', example: 109 },
+                  },
+                  required: ['address', 'phone', 'deliveryType'],
+                },
+              },
+            },
           },
+          responses: { 201: { description: 'Order created successfully' } },
+        },
+      },
+      '/api/order/history': {
+        get: {
+          summary: 'Get User Orders',
+          description: 'Retrieve all orders for the authenticated user',
+          tags: ['Order'],
+          responses: { 200: { description: 'Successful response' } },
         },
       },
     },
