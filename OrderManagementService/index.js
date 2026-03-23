@@ -4,8 +4,13 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import orderRoutes from "./routes/orderRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import { swaggerUi, specs } from './swagger.config.js';
+import helmet from 'helmet';
 
 const app = express();
+
+// Security middleware
+app.use(helmet());
 
 // CORS configuration
 // ----------------------
@@ -43,6 +48,15 @@ app.get('/', (req, res) => {
   res.send('Order Management Backend is WORKING✅');
 });
 
+// ✅ HEALTH CHECK (VERY IMPORTANT FOR AWS)
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+
+// Swagger Documentation Route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
 // Start server and connect DB
 const port = process.env.PORT || 4000;
 const mongoURI = process.env.MONGO_URI;
@@ -56,8 +70,7 @@ mongoose
   .connect(mongoURI)
   .then(() => {
     console.log('Order Management Service Database connected successfully');
-    app.listen(port, () => console.log(`Server is running on port: ${port}`));
-  })
+app.listen(port, '0.0.0.0', () => console.log(`Server is running on port: ${port}`));  })
   .catch((err) => {
     console.error('Database connection error:', err);
     process.exit(1);
