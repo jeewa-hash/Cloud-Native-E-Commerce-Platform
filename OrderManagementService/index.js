@@ -9,23 +9,26 @@ import helmet from 'helmet';
 
 const app = express();
 
-// Security middleware
-app.use(helmet());
+// Swagger Documentation Route (BEFORE helmet to avoid CSP blocking)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
+// Security middleware (CSP disabled to allow Swagger UI)
+app.use(helmet({
+  contentSecurityPolicy: false
+}));
 
 // CORS configuration
-// ----------------------
 const allowedOrigins = [
   'http://localhost:3000',
-  'http://127.0.0.1:3000', 
+  'http://127.0.0.1:3000',
   'http://localhost:5173',
-    'http://order-frontend-bucket-123.s3-website.eu-north-1.amazonaws.com' 
-
+  'http://order-frontend-bucket-123.s3-website.eu-north-1.amazonaws.com'
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); 
+      if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -36,7 +39,6 @@ app.use(
 );
 
 // Middleware
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -53,10 +55,6 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-
-// Swagger Documentation Route
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-
 // Start server and connect DB
 const port = process.env.PORT || 4000;
 const mongoURI = process.env.MONGO_URI;
@@ -70,7 +68,8 @@ mongoose
   .connect(mongoURI)
   .then(() => {
     console.log('Order Management Service Database connected successfully');
-app.listen(port, '0.0.0.0', () => console.log(`Server is running on port: ${port}`));  })
+    app.listen(port, '0.0.0.0', () => console.log(`Server is running on port: ${port}`));
+  })
   .catch((err) => {
     console.error('Database connection error:', err);
     process.exit(1);
