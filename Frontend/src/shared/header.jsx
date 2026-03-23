@@ -7,8 +7,8 @@ import { io } from 'socket.io-client';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { jwtDecode } from 'jwt-decode';
-//import { NOTIFICATION_SERVICE_URL } from '../config.js';
-const NOTIFICATION_SERVICE_URL = "http://localhost:5000";
+import { NOTIFICATION_SERVICE_URL } from '../config.js';
+//const NOTIFICATION_SERVICE_URL = "http://localhost:5000";
 
 const getUserFromToken = () => {
   try {

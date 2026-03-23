@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Bell, ShoppingBag, RefreshCw, CheckCheck, Clock, Filter, Inbox } from 'lucide-react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-//import { NOTIFICATION_SERVICE_URL } from '../config.js';
-const NOTIFICATION_SERVICE_URL = "http://localhost:5000";
+import { NOTIFICATION_SERVICE_URL } from '../config.js';
+//const NOTIFICATION_SERVICE_URL = "http://localhost:5000";
 
 const getUserFromToken = () => {
   try {
