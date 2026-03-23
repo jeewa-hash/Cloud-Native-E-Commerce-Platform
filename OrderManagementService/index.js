@@ -12,49 +12,43 @@ const app = express();
 // Trust AWS ALB proxy
 app.set('trust proxy', true);
 
-
-// ✅ Swagger JSON endpoint (REQUIRED)
-app.get('/api/docs-json', (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.send(specs);
-});
-
-
-// ✅ Swagger UI (MAIN FIX HERE)
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(null, {
-  customSiteTitle: 'Order Management Service API',
-  swaggerOptions: {
-    url: '/api/docs-json',   // 🔥 THIS FIXES LOADING
-    persistAuthorization: true
-  }
-}));
+// Security middleware — must be applied BEFORE Swagger UI
+// CSP is disabled so Swagger UI can load its inline scripts & styles
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 
-// Security
-app.use(helmet({
-  contentSecurityPolicy: false
-}));
+// ✅ Swagger UI — spread serve array for Express 5 compatibility
+app.use('/api-docs', ...swaggerUi.serve, swaggerUi.setup(specs));
 
 
-// CORS
+// CORS configuration
 const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
   'http://localhost:5173',
   'http://localhost:4000',
-  'http://order-frontend-bucket-123.s3-website.eu-north-1.amazonaws.com'
+  'http://order-frontend-bucket-123.s3-website.eu-north-1.amazonaws.com',
+  // Allow requests originating from the ALB (e.g. Swagger UI loaded via ALB URL)
+  'http://orderservice-alb-1335748857.eu-north-1.elb.amazonaws.com',
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS not allowed'));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('CORS not allowed'));
+      }
     }
-  }
-}));
+  })
+);
 
 
 // Middleware
