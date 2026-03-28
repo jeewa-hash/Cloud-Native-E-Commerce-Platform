@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { ShoppingBag, ShoppingCart, User, LogOut, Menu, X, Store,Clock } from 'lucide-react';
 import ShoppingItems from '../components/ShoppingItems';
 import ShopList from '../components/ShopList';
-import CustomerProfile from '../components/CustomerProfile';
 
 const CustomerHome = () => {
     const navigate = useNavigate();
@@ -49,7 +48,11 @@ const CustomerHome = () => {
                 );
             case 'profile':
                 return (
-                    <CustomerProfile/>
+                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 className="text-2xl font-bold mb-6 text-gray-800">Manage Profile</h2>
+                        <p className="text-gray-500">Customer details and profile management will go here.</p>
+                        {/* Profile component will go here */}
+                    </div>
                 );
              case 'orders':
             // Navigate to Order History page
