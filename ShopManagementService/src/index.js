@@ -21,31 +21,25 @@ const allowedOrigins = [
   process.env.FRONTEND_URL  // Cloud එකේ deploy කළ පසු ලැබෙන URL එක
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Origin එකක් නොමැති අවස්ථා (Mobile apps/Postman) වලට ඉඩ දීම
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin) || !origin) {
-        callback(null, true);
-      } else {
-        callback(new Error('The CORS policy for this site does not allow access from the specified origin.'));
-      }
-    },
-    credentials: true
-  })
-);
+app.use(cors({
+  origin: "*",
+  credentials: false
+}));
 
 // --- API Routes ---
 // Shop Management සඳහා වන ප්‍රධාන Route එක
 app.use('/api/products', productRoutes);
 app.use('/api/shops', shopRoutes);
 
-// Base Route
+//TO show ci cd pipe line is working
 app.get('/', (req, res) => {
-  res.send('Shop Management Service Backend is WORKING');
+  res.send('<h1>🚀 CI/CD Pipeline Test: SUCCESS!</h1><p>Hii..</p>');
 });
+
+// // Base Route
+// app.get('/', (req, res) => {
+//   res.send('Shop Management Service Backend is WORKING');
+// });
 
 const port = process.env.PORT || 4040;
 const mongoURI = process.env.MONGO_URI;
@@ -60,8 +54,10 @@ mongoose
   .connect(mongoURI)
   .then(() => {
     console.log('Shop Management Service Database connected successfully');
-    // Database එක සම්බන්ධ වූ පසු පමණක් Server එක ආරම්භ වේ [cite: 28, 53]
+    // Database එක සම්බන්ධ වූ පසු පමණක් Server එක ආරම්භ වේ
     app.listen(port, () => {
+      // CI/CD පරීක්ෂාව සඳහා එක් කළ පණිවිඩය
+      console.log('CI/CD Pipeline Test: New build deployed and running successfully!');
       console.log(`Server is running on port: ${port}`);
     });
   })
