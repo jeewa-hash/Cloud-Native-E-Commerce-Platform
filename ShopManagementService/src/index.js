@@ -21,21 +21,10 @@ const allowedOrigins = [
   process.env.FRONTEND_URL  // Cloud එකේ deploy කළ පසු ලැබෙන URL එක
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Origin එකක් නොමැති අවස්ථා (Mobile apps/Postman) වලට ඉඩ දීම
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin) || !origin) {
-        callback(null, true);
-      } else {
-        callback(new Error('The CORS policy for this site does not allow access from the specified origin.'));
-      }
-    },
-    credentials: true
-  })
-);
+app.use(cors({
+  origin: "*",
+  credentials: false
+}));
 
 // --- API Routes ---
 // Shop Management සඳහා වන ප්‍රධාන Route එක
