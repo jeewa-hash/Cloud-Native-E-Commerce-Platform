@@ -3,6 +3,7 @@ const IS_LOCAL = false;
 const API_GATEWAY = "https://0eqk5p25gi.execute-api.us-east-1.amazonaws.com";
 const AUTH_ALB = "http://auth-alb-1878950287.us-east-1.elb.amazonaws.com"; // ✅ your own auth service
 const SHOP_ALB = "http://shop-alb-1163828963.eu-north-1.elb.amazonaws.com"; // ✅ your own shop service
+
 const LOCAL = {
   BASE_URL: "http://localhost:5002",
   AUTH_API: "http://localhost:5002/api/auth",
