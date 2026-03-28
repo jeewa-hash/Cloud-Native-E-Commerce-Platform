@@ -12,6 +12,5 @@
   "dependencies": {
     "amqplib": "^0.10.9"
   },
-  "devDependencies": {},
   "description": ""
 }
