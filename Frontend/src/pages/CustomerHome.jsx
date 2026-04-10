@@ -20,7 +20,6 @@ const CustomerHome = () => {
     const navItems = [
         { id: 'shopping-items', label: 'Shopping Items', icon: ShoppingBag },
         { id: 'shops', label: 'Shopes', icon: Store },
-        { id: 'cart', label: 'My Cart', icon: ShoppingCart },
         { id: 'profile', label: 'Manage Profile', icon: User },
         { id: 'orders', label: 'Track Orders', icon: Clock },
     ];
@@ -40,25 +39,11 @@ const CustomerHome = () => {
                     );
                 }
                 return <ShopList onShopSelect={(shop) => setSelectedShop(shop)} />;
-            case 'cart':
-                return (
-                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <h2 className="text-2xl font-bold mb-6 text-gray-800">My Cart</h2>
-                        <p className="text-gray-500">View and manage items in your shopping cart.</p>
-                        {/* Cart component will go here */}
-                    </div>
-                );
             case 'profile':
                 return (
-                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <h2 className="text-2xl font-bold mb-6 text-gray-800">Manage Profile</h2>
-                        <p className="text-gray-500">Customer details and profile management will go here.</p>
-                        {/* Profile component will go here */}
-                    </div>
+                    <CustomerProfile onLogout={handleLogout} />
                 );
-             case 'orders':
-            /* // Navigate to Order History page
-            navigate('/order-history');*/            
+             case 'orders':          
                 return (<OrderHistoryPage/>
                     
                 );
