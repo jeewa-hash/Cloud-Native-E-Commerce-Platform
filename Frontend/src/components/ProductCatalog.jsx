@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Package, Edit2, Trash2, Search, ArrowRight, Filter, AlertTriangle } from 'lucide-react';
-import { PRODUCTS_API } from '../apiConfig';
+//import { PRODUCTS_API } from '../apiConfig';
+import config from "../config";
+const PRODUCTS_API = config.PRODUCTS_API;
 
 const ProductCatalog = ({ onAddProduct, onEditProduct }) => {
     const [products, setProducts] = useState([]);

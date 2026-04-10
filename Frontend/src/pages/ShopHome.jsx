@@ -51,7 +51,7 @@ const ShopHome = () => {
                 );
             case 'profile':
                 return (
-                    <ShopOrders/>
+                    <CustomerProfile onLogout={handleLogout} />
                 );
             case 'orders':
                 return <ShopOrders />;
