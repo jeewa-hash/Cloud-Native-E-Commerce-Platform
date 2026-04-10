@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Package, Search, Filter, ShoppingCart, Info, ArrowLeft } from 'lucide-react';
 import CartSidebar from '../OrderManagementServiceFrontend/CartSidebar';
-import { PRODUCTS_API, ORDER_API } from '../apiConfig';
+import { PRODUCTS_API, ORDER_API } from '../../config/apiConfig';
 
 const ShoppingItems = ({ shopId = null, shopName = null, onBack = null }) => {
     const [products, setProducts] = useState([]);

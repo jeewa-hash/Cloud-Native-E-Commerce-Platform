@@ -3,7 +3,8 @@ import Order from "../models/Order.js";
 import mongoose from "mongoose";
 import axios from "axios";
 
-const SHOP_SERVICE_URL = process.env.SHOP_SERVICE_URL;
+// Use your Shop Service URL
+const SHOP_SERVICE_URL = process.env.SHOP_SERVICE_URL || "http://shop-alb-1163828963.eu-north-1.elb.amazonaws.com";
 
 // Optional: fetch product details from Shop service
 async function fetchProduct(productId) {
@@ -16,17 +17,19 @@ async function fetchProduct(productId) {
   }
 }
 
+// ==========================================================
 // CHECKOUT ORDER
+// ==========================================================
 export const checkoutOrder = async (req, res) => {
   const session = await mongoose.startSession();
 
   try {
     await session.startTransaction();
 
-    const { address, phone, paymentMethod = "cod", deliveryType, instructions = "", shippingFee = 109 } = req.body;
+    const { address, zipCode, phone, paymentMethod = "cod", deliveryType, instructions = "", shippingFee = 109 } = req.body;
 
     // Validate required fields
-    const requiredFields = ["address", "phone", "deliveryType"];
+    const requiredFields = ["address", "zipCode", "phone", "deliveryType"];
     const missingFields = requiredFields.filter(f => !req.body[f]);
     if (missingFields.length) {
       await session.abortTransaction();
@@ -78,6 +81,7 @@ export const checkoutOrder = async (req, res) => {
         },
         items: validatedItems,
         address,
+        zipCode,
         phone,
         paymentMethod,
         paymentStatus: "pending",
@@ -160,5 +164,93 @@ export const updateOrderStatus = async (req, res) => {
     res.json({ success: true, order });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+//Chaw
+// GET SHOP ORDERS
+
+export const ordersByShop = async (req, res) => {
+  try {
+    const { status } = req.query;
+
+    const query = { "shop._id": req.shopId };
+
+    // optional filter by status
+    if (status) {
+      query.status = status;
+    }
+
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json({
+      success: true,
+      count: orders.length,
+      orders,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+// UPDATE ORDER STATUS (SHOP OWNER ONLY)
+
+export const updateOrderStatusByShopOwner = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = [
+      "pending",
+      "accepted",
+      "preparing",
+      "ready",
+      "picked-up",
+      "delivered",
+      "completed",
+      "declined",
+    ];
+
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status",
+      });
+    }
+
+    // Find order that belongs to the logged-in shop owner
+    const order = await Order.findOne({
+      _id: orderId,
+      "shop._id": req.shopId,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found for this shop",
+      });
+    }
+
+    order.status = status;
+    order.timeline.push({ status, updatedAt: new Date() });
+
+    await order.save();
+
+    res.json({
+      success: true,
+      message: "Order status updated successfully",
+      order,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
