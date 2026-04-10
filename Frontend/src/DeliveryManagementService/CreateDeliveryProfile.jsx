@@ -3,7 +3,7 @@ import axios from "axios";
 import { Truck, MapPin, Phone, Bike, Loader2, MapPinned, BadgeInfo } from "lucide-react";
 import config from "../config";
 
-const DELIVERY_API_URL = config.DELIVERY_API;
+const DELIVERY_API_URL = config.DELIVERY_API; //myApi
 
 const CreateDeliveryProfile = ({ onCreated }) => {
   const [formData, setFormData] = useState({
