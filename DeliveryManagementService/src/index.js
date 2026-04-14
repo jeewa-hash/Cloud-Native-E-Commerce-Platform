@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import logger from "./utils/logger.js";
 import deliveryRoutes from './routes/deliveryRoutes.js';
+import shipmentRoutes from "./routes/shipmentRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -16,6 +17,7 @@ app.use(express.json());
 
 // Routes
 app.use('/delivery', deliveryRoutes);
+app.use('/delivery', shipmentRoutes);
 
 // Database Connection & Server Start
 const PORT = process.env.PORT || 5003; 

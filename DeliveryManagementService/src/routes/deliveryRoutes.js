@@ -1,32 +1,41 @@
 import express from "express";
+import authUser from "../middleware/authUser.js";
+import requireDeliveryRole from "../middleware/requireDeliveryRole.js";
 import {
-  createDeliveryPerson,
-  getDeliveryPersons,
-  getProfile,
-  assignShipment,
-  pickupShipment,
-  addTracking,
-  markDelivered,
-  markFailed,
-  returnToShop,
-  markReturned
+  createDeliveryProfile,
+  getMyDeliveryProfile,
+  updateMyDeliveryProfile,
+  updateAvailabilityStatus,
 } from "../controllers/deliveryController.js";
-import { authMiddleware, requireDeliveryRole } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/delivery-persons", authMiddleware, requireDeliveryRole, createDeliveryPerson);
-router.get("/delivery-persons", getDeliveryPersons);
-router.get("/delivery-profile", authMiddleware, requireDeliveryRole, getProfile);
+router.post(
+  "/delivery-persons",
+  authUser,
+  requireDeliveryRole,
+  createDeliveryProfile
+);
 
-router.post("/shipments/assign", assignShipment);
-router.put("/shipments/:id/pickup", pickupShipment);
-router.put("/shipments/:id/tracking", addTracking);
-router.put("/shipments/:id/deliver", markDelivered);
+router.get(
+  "/delivery-profile",
+  authUser,
+  requireDeliveryRole,
+  getMyDeliveryProfile
+);
 
-// returns
-router.put("/shipments/:id/fail", markFailed);
-router.put("/shipments/:id/return", returnToShop);
-router.put("/shipments/:id/returned", markReturned);
+router.put(
+  "/delivery-profile",
+  authUser,
+  requireDeliveryRole,
+  updateMyDeliveryProfile
+);
+
+router.patch(
+  "/delivery-profile/availability",
+  authUser,
+  requireDeliveryRole,
+  updateAvailabilityStatus
+);
 
 export default router;

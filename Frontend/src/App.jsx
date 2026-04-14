@@ -45,7 +45,7 @@ function App() {
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={['delivery']} />}>
-          <Route path="/delivery-profile" element={<DeliveryLanding />} />
+          <Route path="/delivery-landing" element={<DeliveryLanding />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={['customer', 'shop', 'admin']} />}>

@@ -1,5 +1,3 @@
-import { PRODUCTS_API, SHOP_API } from "./apiConfig";
-
 export default {
     DELIVERY_API: "http://localhost:5003/delivery",
     ORDER_API: "http://localhost:4000/api/order",
