@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import CreateDeliveryProfile from "../DeliveryManagementService/CreateDeliveryProfile";
-import DeliveryDashboard from "../DeliveryManagementService/DeliveryDashboard";
-
-import config from "../config";
-const DELIVERY_API = config.DELIVERY_API;
+import { getMyDeliveryProfile } from "../services/deliveryApi";
+import CreateDeliveryProfile from "../Delivery/CreateDeliveryProfile";
+import DeliveryDashboard from "../Delivery/DeliveryDashboard";
 
 const DeliveryLandingPage = () => {
   const [loading, setLoading] = useState(true);
@@ -12,15 +9,12 @@ const DeliveryLandingPage = () => {
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem("token");
+      setLoading(true);
+      const res = await getMyDeliveryProfile();
 
-      const response = await axios.get(`${DELIVERY_API}/delivery-profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setProfile(response.data.profile);
+      if (res.data.success) {
+        setProfile(res.data.profile);
+      }
     } catch (error) {
       setProfile(null);
     } finally {
@@ -33,14 +27,21 @@ const DeliveryLandingPage = () => {
   }, []);
 
   if (loading) {
-    return <div className="p-10">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">Loading delivery workspace...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!profile) {
     return <CreateDeliveryProfile onProfileCreated={fetchProfile} />;
   }
 
-  return <DeliveryDashboard profile={profile} />;
+  return <DeliveryDashboard profile={profile} onProfileRefresh={fetchProfile} />;
 };
 
 export default DeliveryLandingPage;

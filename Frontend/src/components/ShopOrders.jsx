@@ -79,9 +79,9 @@ const ShopOrdersPage = () => {
     try {
       setActionLoading(orderId);
       setError("");
-
+  
       const token = localStorage.getItem("token");
-
+  
       const res = await axios.patch(
         `${ORDER_SERVICE_URL}/shop/orders/${orderId}/status`,
         { status: newStatus },
@@ -91,19 +91,40 @@ const ShopOrdersPage = () => {
           },
         }
       );
-
-      if (res.data.success) {
-        setOrders((prev) =>
-          prev.map((order) =>
-            order._id === orderId
-              ? {
-                  ...order,
-                  status: res.data.order.status,
-                  timeline: res.data.order.timeline || order.timeline,
-                }
-              : order
-          )
-        );
+  
+      if (!res.data.success) {
+        setError("Failed to update order status.");
+        return;
+      }
+  
+      const updatedOrder = res.data.order;
+      const deliveryAssignment = res.data.deliveryAssignment;
+  
+      setOrders((prev) =>
+        prev.map((order) =>
+          order._id === orderId
+            ? {
+                ...order,
+                ...updatedOrder,
+                status: updatedOrder.status,
+                timeline: updatedOrder.timeline || order.timeline,
+                deliveryAssignmentStatus:
+                  updatedOrder.deliveryAssignmentStatus ||
+                  order.deliveryAssignmentStatus,
+              }
+            : order
+        )
+      );
+  
+      if (newStatus === "ready") {
+        if (deliveryAssignment?.assigned) {
+          alert("Order marked as ready and delivery person assigned.");
+        } else {
+          alert(
+            deliveryAssignment?.message ||
+              "Order marked as ready, but no delivery person was available."
+          );
+        }
       }
     } catch (err) {
       console.error("Error updating order status:", err);
@@ -114,7 +135,7 @@ const ShopOrdersPage = () => {
       setActionLoading("");
     }
   };
-
+  
   const toggleOrder = (orderId) => {
     setExpandedOrder((prev) => (prev === orderId ? null : orderId));
   };

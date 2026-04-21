@@ -89,7 +89,7 @@ const DeliveryTracking = () => {
       setLoading(true);
       setError("");
       const token = localStorage.getItem("token");
-      const res = await axios.get(`${DELIVERY_API_URL}/my-deliveries`, {
+      const res = await axios.get(`${DELIVERY_API_URL}/delivery/my-deliveries`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const list = res.data.deliveries || res.data.orders || [];
@@ -111,7 +111,7 @@ const DeliveryTracking = () => {
       setUpdateMsg("");
       const token = localStorage.getItem("token");
       await axios.patch(
-        `${DELIVERY_API_URL}/deliveries/${selected._id}/status`,
+        `${DELIVERY_API_URL}/delivery/deliveries/${selected._id}/status`,
         { status: updateStatus, note: updateNote },
         { headers: { Authorization: `Bearer ${token}` } }
       );

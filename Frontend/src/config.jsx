@@ -1,5 +1,5 @@
 export default {
-    DELIVERY_API: "http://localhost:5003/delivery",
+    DELIVERY_API: "http://localhost:5003",
     ORDER_API: "http://localhost:4000/api/order",
     USER_API: "http://localhost:5002/api/users",
     PRODUCTS_API: "http://localhost:4040/api/products",
