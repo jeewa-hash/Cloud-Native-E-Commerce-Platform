@@ -11,26 +11,37 @@ const app = express();
 // Trust AWS ALB proxy
 app.set('trust proxy', true);
 
-// CORS configuration
+// ✅ CORS configuration
 const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
-  'http://localhost:5173',
+  'http://localhost:5174',
   'http://localhost:4000',
   'http://order-frontend-bucket-123.s3-website.eu-north-1.amazonaws.com',
   'http://orderservice-alb-1335748857.eu-north-1.elb.amazonaws.com',
 ];
 
+// Normalize origins (remove trailing slash issues)
+const normalizedAllowedOrigins = allowedOrigins.map(o => o.replace(/\/$/, ""));
+
 app.use(
   cors({
     origin: function (origin, callback) {
+      console.log("Request Origin:", origin);
+
+      // allow Postman / mobile / curl
       if (!origin) return callback(null, true);
+
       if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('CORS not allowed'));
+        return callback(null, true);
       }
-    }
+
+      console.warn("Blocked by CORS:", origin);
+
+      // ❗ IMPORTANT: do NOT throw error
+      return callback(null, false);
+    },
+    credentials: true
   })
 );
 
@@ -55,7 +66,7 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// Start server
+// Server & DB setup
 const port = process.env.PORT || 4000;
 const mongoURI = process.env.MONGO_URI;
 
