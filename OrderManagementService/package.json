@@ -4,16 +4,15 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-  "start": "node index.js",
-  "dev": "nodemon index.js"
-}
-
-,
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@notification-app/shared": "file:../Shared",
     "amqplib": "^0.10.9",
     "axios": "^1.13.6",
     "cloudinary": "^2.9.0",
