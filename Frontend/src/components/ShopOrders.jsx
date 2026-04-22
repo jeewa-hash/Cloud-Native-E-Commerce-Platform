@@ -28,6 +28,7 @@ const ShopOrdersPage = () => {
   const [error, setError] = useState("");
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [selectedStatuses, setSelectedStatuses] = useState({});
 
   const statusOptions = [
     "pending",
@@ -59,7 +60,14 @@ const ShopOrdersPage = () => {
       });
 
       if (res.data.success) {
-        setOrders(res.data.orders || []);
+        const fetchedOrders = res.data.orders || [];
+        setOrders(fetchedOrders);
+
+        const initialStatuses = {};
+        fetchedOrders.forEach((order) => {
+          initialStatuses[order._id] = order.status;
+        });
+        setSelectedStatuses(initialStatuses);
       } else {
         setError("Failed to load shop orders.");
       }
@@ -79,10 +87,21 @@ const ShopOrdersPage = () => {
     try {
       setActionLoading(orderId);
       setError("");
-  
+
+      const currentOrder = orders.find((order) => order._id === orderId);
+      if (!currentOrder) {
+        setError("Order not found in current view.");
+        return;
+      }
+
+      if (currentOrder.status === newStatus) {
+        setActionLoading("");
+        return;
+      }
+
       const token = localStorage.getItem("token");
-  
-      const res = await axios.patch(
+
+      const res = await axios.put(
         `${ORDER_SERVICE_URL}/shop/orders/${orderId}/status`,
         { status: newStatus },
         {
@@ -91,15 +110,35 @@ const ShopOrdersPage = () => {
           },
         }
       );
-  
+
       if (!res.data.success) {
-        setError("Failed to update order status.");
+        setError(res.data.message || "Failed to update order status.");
+
+        setSelectedStatuses((prev) => ({
+          ...prev,
+          [orderId]: currentOrder.status,
+        }));
         return;
       }
-  
+
       const updatedOrder = res.data.order;
       const deliveryAssignment = res.data.deliveryAssignment;
-  
+
+      // If backend allows success but delivery assignment failed for "ready",
+      // do not update local UI state.
+      if (newStatus === "ready" && !deliveryAssignment?.assigned) {
+        setError(
+          deliveryAssignment?.message ||
+            "Delivery assignment failed. Order status was not updated."
+        );
+
+        setSelectedStatuses((prev) => ({
+          ...prev,
+          [orderId]: currentOrder.status,
+        }));
+        return;
+      }
+
       setOrders((prev) =>
         prev.map((order) =>
           order._id === orderId
@@ -115,27 +154,33 @@ const ShopOrdersPage = () => {
             : order
         )
       );
-  
+
+      setSelectedStatuses((prev) => ({
+        ...prev,
+        [orderId]: updatedOrder.status,
+      }));
+
       if (newStatus === "ready") {
-        if (deliveryAssignment?.assigned) {
-          alert("Order marked as ready and delivery person assigned.");
-        } else {
-          alert(
-            deliveryAssignment?.message ||
-              "Order marked as ready, but no delivery person was available."
-          );
-        }
+        alert("Order marked as ready and delivery person assigned.");
       }
     } catch (err) {
       console.error("Error updating order status:", err);
       setError(
         err?.response?.data?.message || "Failed to update order status."
       );
+
+      const currentOrder = orders.find((order) => order._id === orderId);
+      if (currentOrder) {
+        setSelectedStatuses((prev) => ({
+          ...prev,
+          [orderId]: currentOrder.status,
+        }));
+      }
     } finally {
       setActionLoading("");
     }
   };
-  
+
   const toggleOrder = (orderId) => {
     setExpandedOrder((prev) => (prev === orderId ? null : orderId));
   };
@@ -203,21 +248,6 @@ const ShopOrdersPage = () => {
     return statusMap[status] || statusMap.pending;
   };
 
-  const getAllowedNextStatuses = (currentStatus) => {
-    const flow = {
-      pending: ["accepted", "declined"],
-      accepted: ["preparing", "declined"],
-      preparing: ["ready"],
-      ready: ["picked-up"],
-      "picked-up": ["delivered"],
-      delivered: ["completed"],
-      completed: [],
-      declined: [],
-    };
-
-    return flow[currentStatus] || [];
-  };
-
   const stats = useMemo(() => {
     return {
       total: orders.length,
@@ -245,7 +275,6 @@ const ShopOrdersPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
       <div className="max-w-7xl mx-auto">
-        {/* stats */}
         {orders.length > 0 && (
           <div className="mt-8 mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-white rounded-xl shadow p-4">
@@ -276,7 +305,6 @@ const ShopOrdersPage = () => {
           </div>
         )}
 
-        {/* error */}
         {error && (
           <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg flex items-start">
             <XCircle className="text-red-500 mr-3 flex-shrink-0" size={20} />
@@ -284,28 +312,33 @@ const ShopOrdersPage = () => {
           </div>
         )}
 
-        {/* top actions */}
         <div className="bg-white rounded-2xl shadow-lg p-4 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium text-gray-700 mr-2">Filter by:</span>
 
-            {["all", "pending", "accepted", "preparing", "ready", "delivered", "declined"].map(
-              (item) => (
-                <button
-                  key={item}
-                  onClick={() => setFilter(item)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    filter === item
-                      ? "bg-orange-600 text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
-                >
-                  {item === "all"
-                    ? "All Orders"
-                    : item.charAt(0).toUpperCase() + item.slice(1)}
-                </button>
-              )
-            )}
+            {[
+              "all",
+              "pending",
+              "accepted",
+              "preparing",
+              "ready",
+              "delivered",
+              "declined",
+            ].map((item) => (
+              <button
+                key={item}
+                onClick={() => setFilter(item)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  filter === item
+                    ? "bg-orange-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {item === "all"
+                  ? "All Orders"
+                  : item.charAt(0).toUpperCase() + item.slice(1)}
+              </button>
+            ))}
           </div>
 
           <button
@@ -317,7 +350,6 @@ const ShopOrdersPage = () => {
           </button>
         </div>
 
-        {/* orders */}
         {orders.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
             <Package className="mx-auto text-gray-400 mb-4" size={64} />
@@ -334,14 +366,12 @@ const ShopOrdersPage = () => {
               const statusInfo = getStatusInfo(order.status);
               const StatusIcon = statusInfo.icon;
               const isExpanded = expandedOrder === order._id;
-              const nextStatuses = getAllowedNextStatuses(order.status);
 
               return (
                 <div
                   key={order._id}
                   className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl"
                 >
-                  {/* main header */}
                   <div
                     className="p-6 cursor-pointer"
                     onClick={() => toggleOrder(order._id)}
@@ -389,10 +419,8 @@ const ShopOrdersPage = () => {
                     </div>
                   </div>
 
-                  {/* details */}
                   {isExpanded && (
                     <div className="border-t border-gray-100">
-                      {/* quick info */}
                       <div className="p-6 bg-gray-50 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                         <div>
                           <h4 className="font-bold mb-2 flex items-center">
@@ -435,7 +463,6 @@ const ShopOrdersPage = () => {
                         </div>
                       </div>
 
-                      {/* shop items */}
                       <div className="p-6">
                         <h3 className="font-bold mb-4 flex items-center">
                           <Package className="text-orange-600 mr-2" size={20} />
@@ -483,7 +510,6 @@ const ShopOrdersPage = () => {
                         )}
                       </div>
 
-                      {/* status update */}
                       <div className="p-6 border-t border-gray-100 bg-gray-50">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                           <div>
@@ -496,34 +522,53 @@ const ShopOrdersPage = () => {
                                 {order.status}
                               </span>
                             </p>
+                            {order.deliveryAssignmentStatus && (
+                              <p className="text-sm text-gray-500 mt-1">
+                                Delivery Assignment:{" "}
+                                <span className="font-semibold">
+                                  {order.deliveryAssignmentStatus}
+                                </span>
+                              </p>
+                            )}
                           </div>
 
-                          <div className="flex flex-wrap gap-2">
-                            {nextStatuses.length === 0 ? (
-                              <span className="text-sm text-gray-500 bg-white px-4 py-2 rounded-lg border">
-                                No further actions
-                              </span>
-                            ) : (
-                              nextStatuses.map((status) => (
-                                <button
-                                  key={status}
-                                  onClick={() =>
-                                    updateOrderStatus(order._id, status)
-                                  }
-                                  disabled={actionLoading === order._id}
-                                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
-                                >
-                                  {actionLoading === order._id
-                                    ? "Updating..."
-                                    : `Mark as ${status}`}
-                                </button>
-                              ))
-                            )}
+                          <div className="flex flex-wrap items-center gap-2">
+                            <select
+                              value={selectedStatuses[order._id] || order.status}
+                              onChange={(e) =>
+                                setSelectedStatuses((prev) => ({
+                                  ...prev,
+                                  [order._id]: e.target.value,
+                                }))
+                              }
+                              disabled={actionLoading === order._id}
+                              className="px-4 py-2 rounded-xl text-sm font-semibold bg-white border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            >
+                              {statusOptions.map((status) => (
+                                <option key={status} value={status}>
+                                  {status}
+                                </option>
+                              ))}
+                            </select>
+
+                            <button
+                              onClick={() =>
+                                updateOrderStatus(
+                                  order._id,
+                                  selectedStatuses[order._id] || order.status
+                                )
+                              }
+                              disabled={actionLoading === order._id}
+                              className="px-4 py-2 rounded-xl text-sm font-semibold bg-orange-600 text-white hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+                            >
+                              {actionLoading === order._id
+                                ? "Updating..."
+                                : "Update"}
+                            </button>
                           </div>
                         </div>
                       </div>
 
-                      {/* totals */}
                       <div className="p-6 border-t border-gray-100">
                         <div className="flex justify-between items-center">
                           <div>
@@ -551,8 +596,6 @@ const ShopOrdersPage = () => {
             })}
           </div>
         )}
-
-
       </div>
     </div>
   );
