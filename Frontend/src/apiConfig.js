@@ -8,7 +8,7 @@ const LOCAL = {
   BASE_URL: "http://localhost:5002",
   AUTH_API: "http://localhost:5002/api/auth",
   SHOP_API: "http://localhost:4040/api/shops",
-  ORDER_API: "http://localhost:4000/api",
+  ORDER_API: "http://localhost:4000/api/order",
   NOTIFICATION_SERVICE_URL: "http://localhost:5000",
   PRODUCTS_API: "http://localhost:4040/api/products"
 };
