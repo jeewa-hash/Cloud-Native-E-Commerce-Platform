@@ -8,10 +8,9 @@ const sameProduct = (a, b) => a.toString() === b.toString();
 // ------------------------------
 async function fetchProduct(productId) {
   try {
-    // 👇 direct URL (NO ENV VARIABLE NEEDED)
-    const response = await axios.get(
-      `http://localhost:4040/api/products/${productId}`
-    );
+    // 👇 Use environment variable for service URL
+    const shopServiceUrl = process.env.SHOP_SERVICE_URL || 'http://localhost:4040/api/products';
+    const response = await axios.get(`${shopServiceUrl}/${productId}`);
 
     return response.data || null;
 
