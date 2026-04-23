@@ -7,7 +7,7 @@ const SHOP_ALB = "http://shop-alb-1290651910.us-east-1.elb.amazonaws.com"; // âœ
 const LOCAL = {
   BASE_URL: "http://localhost:5002",
   AUTH_API: "http://localhost:5002/api/auth",
-  SHOP_API: "http://localhost:4040/api/shop",
+  SHOP_API: "http://localhost:4040/api/shops",
   ORDER_API: "http://localhost:4000/api",
   NOTIFICATION_SERVICE_URL: "http://localhost:5000",
   PRODUCTS_API: "http://localhost:4040/api/products"

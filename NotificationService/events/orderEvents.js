@@ -22,34 +22,42 @@ export const listenOrderEvents = async (app) => {
           console.log(" [x] Received Full Data:", event);
 
           const eventType = event.type || "ORDER_CREATED";
-          const shopId = event.shopId || event.restaurantId; 
+          const shopId = event.shopId || event.restaurantId;
 
           if (eventType === "ORDER_CREATED") {
             console.log(`Processing Order: ${event.orderId} for Shop: ${shopId}`);
 
-            // 1. Save to DB for the Shop
             if (shopId) {
               const shopNotify = await createNotification({
-                recipientId: shopId,
+                recipientId:   shopId,
                 recipientType: "RESTAURANT",
-                type: "ORDER_CREATED", // <--- THIS WAS MISSING
-                message: `New Order Received! ID: ${event.orderId}`,
-                orderId: event.orderId
+                type:          "ORDER_CREATED",
+                relatedId:     event.orderId,
+                title:         "New Order Received!",
+                message:       `New order #${String(event.orderId).slice(-6).toUpperCase()} · $${event.totalAmount}`,
+
+                // rich fields
+                totalAmount:     event.totalAmount,
+                subtotal:        event.subtotal,
+                shippingFee:     event.shippingFee,
+                status:          event.status,
+                paymentMethod:   event.paymentMethod,
+                customerId:      event.customerId,
+                shop:            event.shop,
+                items:           event.items,
+                deliveryAddress: event.deliveryAddress,
               });
 
-              // 2. Emit Real-time
               if (shopNotify) {
-                 io.to(shopId).emit('notification', shopNotify);
-                 console.log(" [v] Success: Notification saved and emitted.");
+                io.to(shopId).emit('notification', shopNotify);
+                console.log(" [v] Success: Notification saved and emitted.");
               }
             }
-            
-            // Acknowledge the message ONLY if processing was successful
+
             channel.ack(msg);
           }
         } catch (err) {
           console.error("❌ Error processing notification:", err.message);
-          // Optional: channel.nack(msg, false, true); // to requeue if it failed
         }
       }
     });

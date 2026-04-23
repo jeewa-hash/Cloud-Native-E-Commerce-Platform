@@ -1,14 +1,8 @@
-// Header.jsx — with "View all notifications" link
-
 import React, { useState, useRef, useEffect } from 'react';
 import { ShoppingCart, Bell, User, MapPin, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { io } from 'socket.io-client';
-import axios from 'axios';
-import toast from 'react-hot-toast';
 import { jwtDecode } from 'jwt-decode';
-import { NOTIFICATION_SERVICE_URL } from '../apiConfig.js';
-//const NOTIFICATION_SERVICE_URL = "http://localhost:5000";
+import { useNotifications } from '../hooks/useNotifications';
 
 const getUserFromToken = () => {
   try {
@@ -27,74 +21,15 @@ const getUserFromToken = () => {
 };
 
 const Header = () => {
-  const [currentUser]   = useState(() => getUserFromToken()); // ✅ lazy init — survives refresh
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount]     = useState(0);
-  const [dropdownOpen, setDropdownOpen]   = useState(false);
+  const [currentUser] = useState(() => getUserFromToken());
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const socketRef   = useRef(null);
-  const navigate    = useNavigate();
+  const navigate = useNavigate();
 
   const roomId   = currentUser?.id || currentUser?._id;
   const userRole = currentUser?.role;
 
-  // Fetch latest 5 for dropdown preview
-  useEffect(() => {
-    if (!roomId) return;
-    axios.get(`${NOTIFICATION_SERVICE_URL}/api/notifications/${roomId}`)
-      .then(res => {
-        const sorted = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setNotifications(sorted.slice(0, 5)); // only show 5 in dropdown
-        setUnreadCount(res.data.filter(n => !n.isRead).length);
-      })
-      .catch(err => console.error("❌ Fetch notifications failed:", err.message));
-  }, [roomId]);
-
-  // Socket.io real-time listener
-  useEffect(() => {
-    if (!roomId) return;
-
-    const socket = io(NOTIFICATION_SERVICE_URL, {
-      transports: ['websocket', 'polling'],
-      reconnectionAttempts: 5,
-      reconnectionDelay: 2000,
-    });
-    socketRef.current = socket;
-
-    socket.on('connect', () => {
-      socket.emit('join', roomId);
-      console.log("📡 Joined room:", roomId);
-    });
-
-    socket.on('notification', (newNotif) => {
-      setNotifications(prev => [newNotif, ...prev].slice(0, 5));
-      setUnreadCount(prev => prev + 1);
-
-      toast.custom((t) => (
-        <div style={{
-          background: 'white', width: 340, borderRadius: 14,
-          borderLeft: '4px solid #e87722', padding: '14px 16px',
-          boxShadow: '0 12px 40px rgba(0,0,0,0.13)',
-          display: 'flex', justifyContent: 'space-between',
-          alignItems: 'flex-start', gap: 12,
-          opacity: t.visible ? 1 : 0, transition: 'opacity 0.3s',
-        }}>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#e87722', marginBottom: 4 }}>
-              🔔 {newNotif.type?.replace(/_/g, ' ')}
-            </div>
-            <div style={{ fontSize: 13, color: '#333', lineHeight: 1.4 }}>{newNotif.message}</div>
-          </div>
-          <button onClick={() => toast.dismiss(t.id)}
-            style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer', fontSize: 20, lineHeight: 1, flexShrink: 0 }}>
-            ×
-          </button>
-        </div>
-      ), { duration: 5000, position: 'top-right' });
-    });
-
-    return () => socket.disconnect();
-  }, [roomId]);
+  const { notifications, unreadCount, markAllRead } = useNotifications(roomId);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -105,11 +40,6 @@ const Header = () => {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
-
-  const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-    setUnreadCount(0);
-  };
 
   return (
     <>
@@ -193,8 +123,12 @@ const Header = () => {
                     {notifications.length === 0 ? (
                       <div className="notif-empty">🔔 No notifications yet</div>
                     ) : (
-                      notifications.map((n, i) => (
-                        <div key={n._id || i} className={`notif-item ${!n.isRead ? 'unread' : ''}`}>
+                      notifications.slice(0, 5).map((n, i) => (
+                        <div
+                          key={n._id || i}
+                          className={`notif-item ${!n.isRead ? 'unread' : ''}`}
+                          onClick={() => { setDropdownOpen(false); navigate('/notifications'); }}
+                        >
                           <div className="notif-type">{n.type?.replace(/_/g, ' ')}</div>
                           <div className="notif-msg">{n.message}</div>
                           <div className="notif-time">{new Date(n.createdAt).toLocaleString()}</div>
@@ -203,7 +137,6 @@ const Header = () => {
                     )}
                   </div>
 
-                  {/* ✅ View all → full NotificationPage */}
                   <div className="notif-footer">
                     <button
                       className="notif-view-all"
@@ -232,4 +165,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default Header;  
