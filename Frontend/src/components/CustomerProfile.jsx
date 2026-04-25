@@ -3,7 +3,6 @@ import axios from 'axios';
 import { User, Mail, Phone, Save, Loader2 } from 'lucide-react';
 import config from "../config";
 const USER_API = config.USER_API; 
-
 const CustomerProfile = () => {
     const [profile, setProfile] = useState({
         username: '',
