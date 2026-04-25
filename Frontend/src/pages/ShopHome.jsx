@@ -6,6 +6,7 @@ import ProductCatalog from '../components/ProductCatalog';
 import CustomerProfile from '../components/CustomerProfile';
 import ShopOrders from '../components/ShopOrders';
 
+
 const ShopHome = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('catalog');

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Store, Search, MapPin, ChevronRight, Phone, Mail } from 'lucide-react';
-//import { SHOP_API } from '../apiConfig';
-import config from "../config";
-const SHOP_API = config.SHOP_API; 
+import { SHOP_API } from '../apiConfig';
+
 const ShopList = ({ onShopSelect }) => {
     const [shops, setShops] = useState([]);
     const [isLoading, setIsLoading] = useState(true);

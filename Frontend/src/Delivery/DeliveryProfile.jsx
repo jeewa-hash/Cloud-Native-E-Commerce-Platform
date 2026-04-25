@@ -19,7 +19,6 @@ import {
   Star,
 } from "lucide-react";
 import config from "../config";
-
 const DELIVERY_API_URL = config.DELIVERY_API;
 
 const Field = ({ icon: Icon, label, value }) => (

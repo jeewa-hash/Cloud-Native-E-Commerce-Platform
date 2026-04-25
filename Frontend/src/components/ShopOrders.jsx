@@ -18,8 +18,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import config from "../config";
-const ORDER_SERVICE_URL = config.ORDER_API;
+import { ORDER_API } from '../apiConfig';
 
 const ShopOrdersPage = () => {
   const [orders, setOrders] = useState([]);
