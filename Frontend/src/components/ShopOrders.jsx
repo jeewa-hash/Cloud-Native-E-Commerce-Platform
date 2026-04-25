@@ -49,8 +49,8 @@ const ShopOrdersPage = () => {
 
       const url =
         filter === "all"
-          ? `${ORDER_SERVICE_URL}/shop/orders`
-          : `${ORDER_SERVICE_URL}/shop/orders?status=${filter}`;
+          ? `${ORDER_API}/shop/orders`
+          : `${ORDER_API}/shop/orders?status=${filter}`;
 
       const res = await axios.get(url, {
         headers: {
@@ -101,7 +101,7 @@ const ShopOrdersPage = () => {
       const token = localStorage.getItem("token");
 
       const res = await axios.put(
-        `${ORDER_SERVICE_URL}/shop/orders/${orderId}/status`,
+        `${ORDER_API}/shop/orders/${orderId}/status`,
         { status: newStatus },
         {
           headers: {

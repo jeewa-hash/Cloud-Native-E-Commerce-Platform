@@ -1,11 +1,12 @@
 import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
+const DELIVERY_SERVICE_URL = process.env.DELIVERY_SERVICE_URL || "http://delivery-service-alb-1864288318.eu-north-1.elb.amazonaws.com/delivery";
 
 export const requestDeliveryAssignment = async (order) => {
   try {
     const response = await axios.post(
-      `${process.env.DELIVERY_SERVICE_URL}/delivery/internal/assign-order`,
+      `${DELIVERY_SERVICE_URL}/delivery/internal/assign-order`,
       {
         orderId: order._id,
         zipCode: order.zipCode,

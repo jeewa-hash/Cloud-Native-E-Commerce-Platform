@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { User, Mail, Phone, Save, Loader2 } from 'lucide-react';
-import config from "../config";
-import { BASE_URL } from '../apiConfig';
-const USER_API = config.USER_API || BASE_URL ; 
+import { USER_API } from '../apiConfig';
 
 const CustomerProfile = () => {
     const [profile, setProfile] = useState({
@@ -43,7 +41,7 @@ const CustomerProfile = () => {
                 return;
             }
 
-            const res = await axios.get(`${USER_API}/api/users/${userId}`);
+            const res = await axios.get(`${USER_API}/${userId}`);
             const user = res.data;
 
             setProfile({

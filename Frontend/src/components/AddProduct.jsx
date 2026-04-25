@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Package, DollarSign, Image as ImageIcon, Tag, AlignLeft, Upload, X, CheckCircle, ToggleLeft } from 'lucide-react';
-//import { PRODUCTS_API } from '../apiConfig';
-import config from "../config";
-const PRODUCTS_API = config.PRODUCTS_API;
+import { PRODUCTS_API } from '../apiConfig';
 
 const AddProduct = ({ onProductAdded, initialData = null }) => {
     const isEditMode = !!initialData;

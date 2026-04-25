@@ -16,7 +16,7 @@ const ShopList = ({ onShopSelect }) => {
     const fetchShops = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.get(SHOP_API);
+            const response = await axios.get(`${SHOP_API}/shops`);
             setShops(response.data);
             setError('');
         } catch (err) {
