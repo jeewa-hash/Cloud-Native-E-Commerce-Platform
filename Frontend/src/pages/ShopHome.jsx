@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Package, PlusCircle, User, LogOut, Menu, X, Store, ClipboardList } from 'lucide-react';
 import AddProduct from '../components/AddProduct';
 import ProductCatalog from '../components/ProductCatalog';
+import CustomerProfile from '../components/CustomerProfile';
 import ShopOrders from '../components/ShopOrders';
 
 const ShopHome = () => {
@@ -50,11 +51,7 @@ const ShopHome = () => {
                 );
             case 'profile':
                 return (
-                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <h2 className="text-2xl font-bold mb-6 text-gray-800">Manage Profile</h2>
-                        <p className="text-gray-500">Shop details and profile management will go here.</p>
-                        {/* Profile form */}
-                    </div>
+                    <CustomerProfile onLogout={handleLogout} />
                 );
             case 'orders':
                 return <ShopOrders />;

@@ -45,6 +45,8 @@ const Login = () => {
                         navigate('/shop-home');
                     } else if (userRole === 'admin') {
                         navigate('/admin-dashboard');
+                    }else if (userRole === 'delivery') {
+                        navigate('/delivery-landing');
                     } else {
                         navigate('/customer-home');
                     }

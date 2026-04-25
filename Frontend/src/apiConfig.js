@@ -3,7 +3,7 @@ const IS_LOCAL = false;
 const API_GATEWAY = "https://0eqk5p25gi.execute-api.us-east-1.amazonaws.com";
 const AUTH_ALB = "http://auth-alb-1878950287.us-east-1.elb.amazonaws.com"; // ✅ your own auth service
 const SHOP_ALB = "http://shop-alb-1290651910.us-east-1.elb.amazonaws.com"; // ✅ your own shop service
-const ORDER_ALB = "http://orderservice-alb-1335748857.eu-north-1.elb.amazonaws.com"; // ✅ your own order service
+
 const LOCAL = {
   BASE_URL: "http://localhost:5002",
   AUTH_API: "http://localhost:5002/api/auth",
@@ -17,7 +17,7 @@ const PROD = {
   BASE_URL: AUTH_ALB,
   AUTH_API: `${AUTH_ALB}/api/auth`,
   SHOP_API: `${SHOP_ALB}/api/shop`,
-  ORDER_API: `${ORDER_ALB}/api`,
+  ORDER_API: `${API_GATEWAY}/api/order`,
   NOTIFICATION_SERVICE_URL: `${API_GATEWAY}/notification`,
   PRODUCTS_API: `${SHOP_ALB}/api/products`
 };
