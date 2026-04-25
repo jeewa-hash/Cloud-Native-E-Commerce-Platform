@@ -30,7 +30,7 @@
         },
         {
           "name": "DELIVERY_SERVICE_URL",
-          "value": "DELIVERY_SERVICE_URL=http://localhost:5003/delivery"
+          "value": "DELIVERY_SERVICE_URL=http://delivery-service-alb-1864288318.eu-north-1.elb.amazonaws.com/delivery"
         }
 
       ],
