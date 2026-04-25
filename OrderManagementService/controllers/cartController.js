@@ -3,7 +3,7 @@ import axios from "axios";
 
 const sameProduct = (a, b) => a.toString() === b.toString();
 
-// ------------------------------
+
 // Fetch product from Shop Service
 // ------------------------------
 async function fetchProduct(productId) {
