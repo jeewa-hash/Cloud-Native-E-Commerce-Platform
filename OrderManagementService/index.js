@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import orderRoutes from "./routes/orderRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import { swaggerUi, specs } from './swagger.config.js';
-
+import shopOrderRoutes from "./routes/shopOrderRoutes.js";
 const app = express();
 
 // Trust AWS ALB proxy
@@ -44,7 +44,7 @@ app.use('/api-docs', ...swaggerUi.serve, swaggerUi.setup(specs));
 // Routes
 app.use("/api/order", orderRoutes);
 app.use("/api/cart", cartRoutes);
-
+app.use("/api/order", shopOrderRoutes); 
 // Test route
 app.get('/', (req, res) => {
   res.send('Order Management Backend is WORKING✅');
