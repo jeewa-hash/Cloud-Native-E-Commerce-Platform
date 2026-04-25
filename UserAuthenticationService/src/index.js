@@ -18,6 +18,18 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
+// Health check
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        success: true,
+        service: 'User Authentication Service',
+        status: 'running',
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString()
+    });
+});
+
+
 // Database Connection & Server Start
 const PORT = process.env.PORT || 5002; // Using 5001 to avoid conflicting with other services
 const MONGO_URI = process.env.MONGO_URI;
