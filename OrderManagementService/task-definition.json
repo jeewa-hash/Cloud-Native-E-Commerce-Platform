@@ -27,7 +27,12 @@
         {
           "name": "AUTH_SERVICE_URL",
           "value": "http://auth-service-alb-123456789.eu-north-1.elb.amazonaws.com/api/auth"
+        },
+        {
+          "name": "DELIVERY_SERVICE_URL",
+          "value": "DELIVERY_SERVICE_URL=http://localhost:5003/delivery"
         }
+
       ],
       "secrets": [
         {
