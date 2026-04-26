@@ -59,6 +59,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # Automatically replace account ID in task-definition.json
+      - name: Inject AWS Account ID into task definition
+        run: |
+          aws_account_id=$(aws sts get-caller-identity --query Account --output text)
+          echo "Discovered AWS Account ID: $aws_account_id"
+          sed -i "s/586988810414/$aws_account_id/g" OrderManagementService/task-definition.json
+          
       # 8️⃣ Update ECS task definition with versioned image
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
