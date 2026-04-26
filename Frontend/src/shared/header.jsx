@@ -96,11 +96,7 @@ const Header = () => {
         </div>
 
         <div className="ecom-main">
-          <a className="ecom-logo" href="/">
-            <div className="ecom-logo-icon"><ShoppingCart size={18} color="white" /></div>
-            <span className="ecom-logo-text">E<span>Com</span></span>
-          </a>
-
+          
           <div className="ecom-actions" ref={dropdownRef}>
             <div style={{ position: 'relative' }}>
               <button className="ecom-icon-btn" onClick={() => setDropdownOpen(o => !o)} title="Notifications">

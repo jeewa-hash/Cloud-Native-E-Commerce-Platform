@@ -1,5 +1,7 @@
 import axios from "axios";
 
+//const SHOP_SERVICE_URL = process.env.SHOP_SERVICE_URL;
+
 // @desc    Get all shops
 // @route   GET /api/shops
 // @access  Public
