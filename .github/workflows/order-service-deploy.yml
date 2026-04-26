@@ -59,13 +59,16 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.DEL_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DEL_AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ secrets.C_AWS_REGION }}
 
-      - name: Check AWS account
+      - name: Check AWS account and ECS target
         run: |
+          echo "Checking AWS account used by GitHub Actions..."
           aws sts get-caller-identity
+          echo "ECS Cluster: ${{ secrets.C_ECS_CLUSTER }}"
+          echo "ECS Service: ${{ secrets.ORD_ECS_SERVICE }}"
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -79,6 +82,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ secrets.ECS_SERVICE }}
-          cluster: ${{ secrets.ECS_CLUSTER }}
+          service: ${{ secrets.ORD_ECS_SERVICE }}
+          cluster: ${{ secrets.C_ECS_CLUSTER }}
           wait-for-service-stability: true
