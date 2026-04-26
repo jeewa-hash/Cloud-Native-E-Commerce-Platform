@@ -36,7 +36,7 @@ jobs:
       - name: Update ECS service
         run: |
           aws ecs update-service \
-            --cluster ecommerce-cluster_notifcation \
+            --cluster ecommerce-cluster_notification \
            --service notification-service-service-ocxaph0o \
             --force-new-deployment \
             --region us-east-1
