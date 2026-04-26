@@ -41,7 +41,7 @@ const UserSchema = new mongoose.Schema({
     // Optional: Support multiple roles if needed
     roles: [{
         type: String,
-        enum: ["customer", "shop", "admin"]
+        enum: ["customer", "shop", "admin", "delivery"],
     }],
 
     // Contact Information
