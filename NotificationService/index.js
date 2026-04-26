@@ -19,7 +19,7 @@ app.use(cors({
 
 app.use(express.json()); // ← must be before routes
 app.get('/', (req, res) => {
-  res.status(200).json({ service: 'Notification Service', status: 'running' });
+  res.send('Notification Service is WORKING✅');
 });
 
 app.get('/health', (req, res) => {
