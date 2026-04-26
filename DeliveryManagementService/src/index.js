@@ -6,7 +6,8 @@ import logger from "./utils/logger.js";
 import deliveryRoutes from "./routes/deliveryRoutes.js";
 import shipmentRoutes from "./routes/shipmentRoutes.js";
 import assignmentRoutes from "./routes/assignmentRoutes.js";
-
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.js";
 // Load environment variables
 dotenv.config();
 
@@ -30,7 +31,7 @@ app.get("/health", (req, res) => {
     service: "delivery-service"
   });
 });
-
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // API Routes
 app.use("/delivery", deliveryRoutes);
 app.use("/delivery", shipmentRoutes);

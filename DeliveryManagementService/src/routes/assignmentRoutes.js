@@ -5,7 +5,7 @@ import { assignOrderInternally } from "../controllers/assignmentController.js";
 const router = express.Router();
 
 router.post(
-  "/delivery/internal/assign-order",
+  "/internal/assign-order",
   verifyServiceToken,
   assignOrderInternally
 );
