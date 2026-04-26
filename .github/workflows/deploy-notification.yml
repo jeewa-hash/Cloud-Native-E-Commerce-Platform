@@ -6,6 +6,7 @@ on:
     paths:
       - 'NotificationService/**'
       - 'Shared/**'
+      - '.github/workflows/deploy-notification.yml'
 
 jobs:
   deploy:
