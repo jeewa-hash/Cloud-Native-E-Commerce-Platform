@@ -31,6 +31,10 @@
         {
           "name": "SERVICE_TO_SERVICE_TOKEN",
           "value": "my_internal_service_token"
+        },
+        {
+          "name": "MONGO_URI",
+          "value": "mongodb+srv://jkumarasekara:d57GMhwHZliDJStN@cluster0.meezaxf.mongodb.net/Orderdb?retryWrites=true&w=majority"
         }
       ],
       "logConfiguration": {
