@@ -9,7 +9,7 @@ const sameProduct = (a, b) => a.toString() === b.toString();
 async function fetchProduct(productId) {
   try {
     // 👇 Use environment variable for service URL
-    const shopServiceUrl = process.env.SHOP_SERVICE_URL || 'http://localhost:4040/api/products';
+    const shopServiceUrl = process.env.SHOP_SERVICE_URL || 'http://gateway-alb-943122502.eu-north-1.elb.amazonaws.com/api';
     const response = await axios.get(`${shopServiceUrl}/${productId}`);
 
     return response.data || null;
