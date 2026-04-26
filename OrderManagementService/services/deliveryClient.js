@@ -3,7 +3,7 @@ import axios from "axios";
 export const requestDeliveryAssignment = async (order) => {
   try {
     const response = await axios.post(
-      `${process.env.DELIVERY_SERVICE_URL}/delivery/internal/assign-order`,
+      `${process.env.DELIVERY_SERVICE_URL}/internal/assign-order`,
       {
         orderId: order._id,
         zipCode: order.zipCode,
