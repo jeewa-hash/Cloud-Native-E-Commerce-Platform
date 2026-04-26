@@ -1,0 +1,62 @@
+{
+  "family": "delivery-service-task",
+  "networkMode": "awsvpc",
+  "executionRoleArn": "arn:aws:iam::493789587013:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "delivery-service",
+      "image": "493789587013.dkr.ecr.eu-north-1.amazonaws.com/delivery-service:latest",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 5003,
+          "hostPort": 5003,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "MONGO_URI",
+          "value": "mongodb+srv://jkumarasekara:d57GMhwHZliDJStN@cluster0.meezaxf.mongodb.net/Deliverydb?retryWrites=true&w=majority"
+        },
+        {
+          "name": "PORT",
+          "value": "5003"
+        },
+        {
+          "name": "SHOP_SERVICE_URL",
+          "value": "http://shop-service-alb-123456789.eu-north-1.elb.amazonaws.com/api/products"
+        },
+        {
+          "name": "AUTH_SERVICE_URL",
+          "value": "http://auth-service-alb-123456789.eu-north-1.elb.amazonaws.com/api/user"
+        },
+        {
+          "name": "ORDER_SERVICE_URL",
+          "value": "http://order-service-alb-123456789.eu-north-1.elb.amazonaws.com/api/order"
+        },
+        {
+          "name": "JWT_SECRET",
+          "value": "super_secret_jwt_key_here"
+        },
+        {
+          "name": "RABBITMQ_URL",
+          "value": "amqp://rabbitmq"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/delivery-service",
+          "awslogs-region": "eu-north-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512"
+}
