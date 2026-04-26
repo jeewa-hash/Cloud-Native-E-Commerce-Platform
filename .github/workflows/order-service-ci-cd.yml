@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'OrderManagementService/**'
+      - '.github/workflows/order-service-ci-cd.yml'
     branches:
       - 'OrderService'
 
