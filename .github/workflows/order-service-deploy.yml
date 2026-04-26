@@ -60,7 +60,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.DEL_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.DEL_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DEL_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.C_AWS_REGION }}
 
       - name: Check AWS account and ECS target
