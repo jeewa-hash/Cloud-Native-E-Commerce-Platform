@@ -22,7 +22,7 @@
         },
         {
           "name": "SHOP_SERVICE_URL",
-          "value": "http://gateway-alb-943122502.eu-north-1.elb.amazonaws.com/api/products"
+          "value": "http://shop-alb-1163828963.eu-north-1.elb.amazonaws.com"
         },
         {
           "name": "AUTH_SERVICE_URL",
