@@ -47,7 +47,7 @@ app.use("/api/cart", cartRoutes);
 
 // Test route
 app.get('/', (req, res) => {
-  res.send('Order Management Backend is WORKINGGGG.............✅');
+  res.send('Order Management Backend is WORKIN.............✅');
 });
 
 // Health check
